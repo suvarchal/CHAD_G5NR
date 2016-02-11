@@ -1,0 +1,3 @@
+version 1.0.0: 2/10/2016
+- split development of CHAD_G5NR from main ClickHist to avoid clutter in the ClickHist project
+- minor bug fixes from last release
