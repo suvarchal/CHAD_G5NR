@@ -21,7 +21,7 @@ import sys
 
 __author__ = 'niznik'
 __clickHistName__ = 'CHAD G5NR'
-__version__ = '1.0.0'
+__version__ = '1.0.1'
 
 
 class ClickHist:
