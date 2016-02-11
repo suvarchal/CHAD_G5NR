@@ -42,6 +42,9 @@ class ClickHist:
         rcParams['toolbar'] = 'None'
 
         # Make sure the tmp directory exists for mostRecentCH.png
+        if not os.path.exists('./Output/'):
+            call('mkdir ./Output/Tmp/', shell=True)
+
         if not os.path.exists('./Output/Tmp/'):
             call('mkdir ./Output/Tmp/', shell=True)
 
@@ -330,14 +333,14 @@ class ClickHist:
                     if self.doObject is None:
                         print('(Doing nothing - no doObject set...)')
                     else:
-                        # This can be edited to do just about anything!
-                        # Here is an implementation with specific
-                        # IDV functionality
-                        # --- USER EDIT FOR CLICKHISTDO ---
                         xPercentile = self.findPercentile(self.xData,
                                                           closestDataX)
                         yPercentile = self.findPercentile(self.yData,
                                                           closestDataY)
+                        # This can be edited to do just about anything!
+                        # Here is an implementation with specific
+                        # IDV functionality
+                        # --- USER EDIT FOR CLICKHISTDO ---
                         self.doObject.do(self.plotPos[locOfMinError],
                                          metadata=self.metadata,
                                          xPer=xPercentile,

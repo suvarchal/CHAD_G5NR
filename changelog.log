@@ -1,3 +1,6 @@
+version 1.0.2: 2/10/2016
+- updating ClickHist_G5NR for compatability with ClickHist V1.0.0
+
 version 1.0.1: 2/10/2016
 - added missing caseNotebookTemplate.ipynb file
 
