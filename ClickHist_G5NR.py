@@ -20,8 +20,9 @@ from subprocess import call
 import sys
 
 __author__ = 'niznik'
-__clickHistName__ = 'CHAD G5NR'
-__version__ = '1.0.4'
+__clickHistImpName__ = 'CHAD G5NR'
+__version__ = '1.0.5'
+__chversion__ = '1.0.0'
 
 
 class ClickHist:
@@ -504,8 +505,11 @@ class ClickHist:
         plt.get_current_fig_manager().window.resizable(False,False)
 
         # Display text with the current version and any other messages
-        self.figure.text(0.01,0.010,
-                         __clickHistName__+' Version '+__version__,
+        self.figure.text(0.01, 0.0225,
+                         __clickHistImpName__+' Version '+__version__,
+                         fontsize=4)
+        self.figure.text(0.01, 0.01,
+                         'Built on ClickHist Version '+__chversion__,
                          fontsize=4)
 
         plt.show()

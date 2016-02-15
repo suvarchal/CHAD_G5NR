@@ -96,6 +96,12 @@ class ClickHistDo:
         if 'dtFromCenter' in kwargs:
             self.dtFromCenter = kwargs['dtFromCenter']*1000
 
+        self.imageVar = ['storms']
+        if 'imageVar' in kwargs:
+            self.imageVar = kwargs['imageVar']
+        if not isinstance(self.imageVar, list):
+            raise TypeError('imageVar should be a list')
+
     def do(self, flatIndex, **kwargs):
 
         """
@@ -165,18 +171,6 @@ class ClickHistDo:
                          datetime.timedelta(0, (self.times[inputTimeIndex])))
         inputTime = int(calendar.timegm(inputDatetime.timetuple()))
 
-        url = ('http://g5nr.nccs.nasa.gov/static/naturerun/fimages/STORMS/' +
-               'Y'+"{:4d}".format(inputDatetime.year) +
-               '/M'+"{:02d}".format(inputDatetime.month) +
-               '/D'+"{:02d}".format(inputDatetime.day) +
-               '/storms_globe_c1440_NR_BETA9-SNAP_' +
-               "{:4d}".format(inputDatetime.year) +
-               "{:02d}".format(inputDatetime.month) +
-               "{:02d}".format(inputDatetime.day) +
-               '_'+"{:02d}".format(inputDatetime.hour) +
-               "{:02d}".format(inputDatetime.minute) +
-               'z.png')
-
         # Inform the user of the time and location of the point
         # And if passed, the values of X and Y as well
         print(inputDatetime)
@@ -186,9 +180,28 @@ class ClickHistDo:
         if ('xPer' in kwargs) and ('yPer' in kwargs):
             print('x%: '+"{:2.3f}".format(kwargs['xPer'])+' ' +
                   'y%: '+"{:2.3f}".format(kwargs['yPer']))
-        print('\nLink to image: '+url)
-        if self.openTab is True:
-            webbrowser.open(url, new=1)
+
+        urlSave = ''
+        for ii in range(0, len(self.imageVar)):
+
+            url = ('http://g5nr.nccs.nasa.gov/static/naturerun/fimages/' +
+                   self.imageVar[ii].upper() +
+                   '/Y'+"{:4d}".format(inputDatetime.year) +
+                   '/M'+"{:02d}".format(inputDatetime.month) +
+                   '/D'+"{:02d}".format(inputDatetime.day) +
+                   '/'+self.imageVar[ii]+'_globe_c1440_NR_BETA9-SNAP_' +
+                   "{:4d}".format(inputDatetime.year) +
+                   "{:02d}".format(inputDatetime.month) +
+                   "{:02d}".format(inputDatetime.day) +
+                   '_'+"{:02d}".format(inputDatetime.hour) +
+                   "{:02d}".format(inputDatetime.minute) +
+                   'z.png')
+            if ii == 0:
+                urlSave = url
+
+            print('\nLink to '+self.imageVar[ii]+' image: '+url)
+            if self.openTab is True:
+                webbrowser.open(url, new=1)
 
         # Based on the lon, lat, and time, determine all necessary input
         # to create an .xidv bundle
@@ -350,8 +363,9 @@ class ClickHistDo:
             lines.insert(insertIndex+5, '    \"![](../Images/' +
                          commonFilename+'_CH.png)\",\n')
 
-            imgFile = StringIO.StringIO(urllib.urlopen(url).read())
+            imgFile = StringIO.StringIO(urllib.urlopen(urlSave).read())
             img = Image.open(imgFile)
+
             # This is unsafe - we should eventually catch edge of image cases
             cropCentX = int((inputLon/360.)*img.width)
             cropCentY = int((-1.*(inputLat-90.)/180.)*img.height)

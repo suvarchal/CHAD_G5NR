@@ -86,6 +86,16 @@ var1Name = 'Precip'
 var2Name = 'W500'
 
 
+# ### What kind of snapshot from the [online G5NR repository](http://g5nr.nccs.nasa.gov/images/) of pre-made images would you like?
+# 
+# **Options:** 'aerosols', 'carbon', 'cloudsir', 'cloudsvis', 'cyclones', 'epv', 'storms', 'temperature', 'tropical', 'water', 'winds'
+# <br>*N.B. Must be a list. If more than one is given, multiple links will be output but only the first will be saved locally.*
+
+# In[ ]:
+
+imageVar = ['storms', 'temperature']
+
+
 # ### Set how large you want the IDV bundle to be in space and time
 # #### Each of these is calculated as distance from center, so `lonOffset = 1.0` means 2.0° of longitude.
 # #### `dtFromCenter` needs to be in seconds
@@ -206,27 +216,6 @@ cdfIn.close()
 
 # ## (4) Create ClickHist and ClickHistDo Instances
 
-# If you want the output of CHAD to be in a separate window, make sure the line below is not commented. Otherwise, the text output will appear below the last cell.
-
-# In[ ]:
-
-get_ipython().magic(u'qtconsole')
-
-
-# ### Initialize 'ClickHist'
-
-# In[ ]:
-
-ClickHist1 = ClickHist.ClickHist(var1Edges,var2Edges,
-                                 var1Values,var2Values,
-                                 xVarName=var1Name,yVarName=var2Name,
-                                 xUnits=var1Units,yUnits=var2Units,
-                                 xFmtStr=var1FmtStr,
-                                 yFmtStr=var2FmtStr,
-                                 maxPlottedInBin=loadmod_G5NR.maxPlottedInBin_UD,
-                                 metadata=metadata_UD)
-
-
 # ### Initialize 'ClickHistDo'
 
 # In[ ]:
@@ -240,14 +229,26 @@ ClickHistDo1 = ClickHistDo.ClickHistDo(lonValues,latValues,
                                        lonOffset=lonOffset,
                                        latOffset=latOffset,
                                        dtFromCenter=dtFromCenter,
+                                       imageVar=imageVar,
                                        openTab=False)
-ClickHist1.setDo(ClickHistDo1)
 
 
-# ## (5) Launch CHAD_G5NR!
+# ### Initialize 'ClickHist' and launch!
+
+# If you want the output of CHAD to be in a separate window, make sure `%qtconsole` below is not commented. Otherwise, the text output will appear below the last cell.
 
 # In[ ]:
 
+get_ipython().magic(u'qtconsole')
+ClickHist1 = ClickHist.ClickHist(var1Edges,var2Edges,
+                                 var1Values,var2Values,
+                                 xVarName=var1Name,yVarName=var2Name,
+                                 xUnits=var1Units,yUnits=var2Units,
+                                 xFmtStr=var1FmtStr,
+                                 yFmtStr=var2FmtStr,
+                                 maxPlottedInBin=loadmod_G5NR.maxPlottedInBin_UD,
+                                 metadata=metadata_UD)
+ClickHist1.setDo(ClickHistDo1)
 ClickHist1.showPlot()
 
 
