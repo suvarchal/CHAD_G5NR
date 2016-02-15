@@ -18,7 +18,7 @@
 # #### This is an IDV bundle with your desired data and displays that ClickHist will alter to focus on the time and location relevant to scatter points you select.
 # Provided by default is the default bundle for GEOS5 - it contains many thermodynamic variables related to precipitation and much finer resolution than our course ClickHist data that we'll load soon.
 
-# In[1]:
+# In[ ]:
 
 bundleInFilename = 'ClickHist_NewAggG5NRtemplate_smallarea.xidv'
 
@@ -27,7 +27,7 @@ bundleInFilename = 'ClickHist_NewAggG5NRtemplate_smallarea.xidv'
 # #### This is a notebook that will be generated separately from this one containing snapshots of ClickHists and other images related to each case you select.
 # This way, without much extra effort you can remember what you were working on!
 
-# In[2]:
+# In[ ]:
 
 caseNotebookFilename = 'myFirstSession'
 
@@ -39,7 +39,7 @@ caseNotebookFilename = 'myFirstSession'
 
 
 
-# In[3]:
+# In[ ]:
 
 # User Changeable Parameters (and appropriate libraries)
 import numpy as np
@@ -129,7 +129,7 @@ maxPlottedInBin_UD = 1000
 #var2Edges = np.arange(0,1+0.01,0.1)
 
 
-# In[4]:
+# In[ ]:
 
 # Helpful fill-in variables that are set if only the name at top is
 # selected
@@ -191,7 +191,7 @@ var2ValueMult = varMultOptions[var2Name]
 
 # #### * There should be nothing to change in the following two cells. *<br>
 
-# In[6]:
+# In[ ]:
 
 # Setting the GUI 
 # ClickHist is currently optimized for tk
@@ -224,7 +224,7 @@ import ClickHistDo_G5NR as ClickHistDo
 import netCDF4
 
 
-# In[7]:
+# In[ ]:
 
 # Fixing the output so it isn't buffered
 # See: http://stackoverflow.com/questions/29772158/make-ipython-notebook-print-in-real-time
@@ -250,7 +250,7 @@ def getIntEdges(dim,low,high):
 
 # #### *Changes here might be necessary to manually override the times to load *<br>
 
-# In[8]:
+# In[ ]:
 
 # Load the Data
 cdfIn = netCDF4.Dataset(urlToLoad,'r')
@@ -290,7 +290,7 @@ latValues = latValues[lowLatInt:highLatInt+1]
 cdfIn.close()
 
 
-# In[9]:
+# In[ ]:
 
 # Create ClickHist using a proper call
 # If you only changed variable values in cells 1 and 4 above,

@@ -15,7 +15,7 @@
 
 # ### 1. Select region and variables, and name your Case Notebook accordingly
 
-# In[1]:
+# In[ ]:
 
 caseNotebookFilename = 'G5NR_Florida_W500_ZSKEDot_4deg_hourly'
 
@@ -67,7 +67,7 @@ startDatetime = datetime.datetime(startYear,startMonth,startDay,
 
 # ### 3. Choose template bundle: simple, or more complex? How large, how long? 
 
-# In[2]:
+# In[ ]:
 
 # Name of bundle template - assumed to be in Outputs/templates
 bundleInFilename = 'ClickHist_NewAggG5NRtemplate_smallarea.xidv'
@@ -81,7 +81,7 @@ dtFromCenter=3*3600
 
 # ### 3. Setup scatterplot window of desired size
 
-# In[3]:
+# In[ ]:
 
 # Scatterplot Size and Resolution
 # Set the figure x by y resolution, DPI, and the max number of points
@@ -154,7 +154,7 @@ var2ValueMult = varMultOptions[var2Name]
 
 # #### A bunch of magics and imports necessary for the plot to come up
 
-# In[4]:
+# In[ ]:
 
 # Setting the GUI 
 # ClickHist is currently optimized for tk
@@ -189,7 +189,7 @@ import netCDF4
 
 # gory details
 
-# In[5]:
+# In[ ]:
 
 # Fixing the output so it isn't buffered
 # See: http://stackoverflow.com/questions/29772158/make-ipython-notebook-print-in-real-time
@@ -215,7 +215,7 @@ def getIntEdges(dim,low,high):
 
 # ### Grabs the coarse data and subsets it. No edits needed, just execute. 
 
-# In[6]:
+# In[ ]:
 
 # Load the datafile
 cdfIn = netCDF4.Dataset(urlToLoad,'r')
@@ -264,7 +264,7 @@ cdfIn.close()
 
 # ### This one actually launches the scatter plot.
 
-# In[7]:
+# In[ ]:
 
 # Create ClickHist using a proper call
 
@@ -303,11 +303,9 @@ ClickHist1.showPlot()
 # # User: now click away!
 # >3. Click on scatterplot. Details of the nearest point is shown in console. 
 # >4. Second click on that point will create a Journal page with browse imagery, and also an IDV bundle centered on the region of your datapoint. 
-# >5. Journal page (in Outputs/...) is itself a PyIDV notebook to capture views and commentary from the IDV bundle, whose name matches and is pre-entered in the Journal page's openBundle command. Select it from your Jupyter "Home" browser tab and you are rolling. 
+# >5. Case Notebook page (in Outputs/CaseNotebooks/) is itself a PyIDV notebook to capture views and commentary from the IDV bundle, whose name matches and is pre-entered in the Journal page's openBundle command. Select it from your Jupyter "Home" browser tab and you are rolling. 
 # >6. If the .xidv loading time is too long for your taste, a .isl file with the same name has also been created. Launching it will create an IDV process offline (without a GUI) to fetch and render the data and create a .zidv bundle, image, and movie. 
 
-# ### *(Clickable Histogram (ClickHist) + Atmospheric Data Input)*
-# 
 # Author: [Matthew Niznik](http://matthewniznik.com) ([matt@matthewniznik.com](mailto:matt@matthewniznik.com))<br>
 # Post-Doctoral Associate, RSMAS, University of Miami
 # 
