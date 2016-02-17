@@ -1,3 +1,6 @@
+version 1.0.6: 2/16/2016
+- Implemented image wraparound and added a red box to indicate where the event occurred for the G5NR imagery in the Case Notebooks
+
 version 1.0.5: 2/15/2016
 - Added the ability for multiple links to be printed (only one subset image saves in the Case Notebook though)
 
