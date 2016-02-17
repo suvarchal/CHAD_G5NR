@@ -189,6 +189,8 @@ lowLonInt,highLonInt = loadmod_G5NR.getIntEdges(lonValues,lonLow,lonHigh)
 lowLatInt,highLatInt = loadmod_G5NR.getIntEdges(latValues,latLow,latHigh)
 
 
+# *Based on the data chunk you're accessing, the variable load may take some time.*
+
 # In[ ]:
 
 var1Values = cdfIn.variables[var1ValueName][:,

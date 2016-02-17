@@ -1,3 +1,7 @@
+version 1.0.7: 2/17/2016
+- Added error handling for if the G5NR image cannot load
+- Added a few notes to the load notebook
+
 version 1.0.6: 2/16/2016
 - Implemented image wraparound and added a red box to indicate where the event occurred for the G5NR imagery in the Case Notebooks
 

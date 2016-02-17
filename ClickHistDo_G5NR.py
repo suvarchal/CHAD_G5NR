@@ -347,6 +347,14 @@ class ClickHistDo:
             print('ClickHistDo could not read the Case Notebook properly. ' +
                   'Not recording...')
         else:
+
+            # Future implementation
+            # Instead of being held hostage by manual index insertion,
+            # create an list/tuple of the lines to insert and then do them
+            # in a final loop
+            # Then you can call `lines.insert(ii+constant, newLine[ii])
+            # or something similar
+
             lines[insertIndex-1] = lines[insertIndex-1][0:3]+',' +\
                                    lines[insertIndex-1][3:]
             lines.insert(insertIndex, '  {\n')
@@ -363,81 +371,90 @@ class ClickHistDo:
             lines.insert(insertIndex+5, '    \"![](../Images/' +
                          commonFilename+'_CH.png)\",\n')
 
-            imgFile = StringIO.StringIO(urllib.urlopen(urlSave).read())
-            imgIn = Image.open(imgFile)
+            imageLoaded = 1
+            try:
+                imgFile = StringIO.StringIO(urllib.urlopen(urlSave).read())
+                imgIn = Image.open(imgFile)
+            except IOError:
+                print('Couldn\'t open the G5NR image...is the server down?')
+                print('(Not saving image file)')
+                imageLoaded = 0
 
-            outImageWidthHalf = int(imgIn.width*(30./360.))
-            outImageHeightHalf = int(imgIn.height*(15./180.))
+            if imageLoaded == 1:
+                outImageWidthHalf = int(imgIn.width*(30./360.))
+                outImageHeightHalf = int(imgIn.height*(15./180.))
 
-            cropCentX = int((inputLon/360.)*imgIn.width)
-            cropCentY = int((-1.*(inputLat-90.)/180.)*imgIn.height)
-            centToEdgeX = outImageWidthHalf
-            centToEdgeY = outImageHeightHalf
+                cropCentX = int((inputLon/360.)*imgIn.width)
+                cropCentY = int((-1.*(inputLat-90.)/180.)*imgIn.height)
+                centToEdgeX = outImageWidthHalf
+                centToEdgeY = outImageHeightHalf
 
-            imgToSave = Image.new("RGB", (outImageWidthHalf*2,
+                imgToSave = Image.new("RGB", (outImageWidthHalf*2,
                                           outImageHeightHalf*2))
 
-            leftEdge = cropCentX-centToEdgeX
-            rightEdge = cropCentX+centToEdgeX
-            upperEdge = cropCentY-centToEdgeY
-            lowerEdge = cropCentY+centToEdgeY
+                leftEdge = cropCentX-centToEdgeX
+                rightEdge = cropCentX+centToEdgeX
+                upperEdge = cropCentY-centToEdgeY
+                lowerEdge = cropCentY+centToEdgeY
 
-            boxHeightOffset = 0
+                boxHeightOffset = 0
 
-            if lowerEdge >= imgIn.height:
-                boxHeightOffset = lowerEdge - imgIn.height
-                lowerEdge = imgIn.height-1
-                upperEdge = lowerEdge-centToEdgeY*2
-            elif upperEdge < 0:
-                boxHeightOffset = upperEdge
-                upperEdge = 0
-                lowerEdge = upperEdge+centToEdgeY*2
+                if lowerEdge >= imgIn.height:
+                    boxHeightOffset = lowerEdge - imgIn.height
+                    lowerEdge = imgIn.height-1
+                    upperEdge = lowerEdge-centToEdgeY*2
+                elif upperEdge < 0:
+                    boxHeightOffset = upperEdge
+                    upperEdge = 0
+                    lowerEdge = upperEdge+centToEdgeY*2
 
-            imgCrop1, imgCrop2 = None, None
+                imgCrop1, imgCrop2 = None, None
 
-            if leftEdge < 0:
-                imgCrop1 = imgIn.crop((leftEdge+imgIn.width,
-                                       upperEdge,
-                                       imgIn.width-1,
-                                       lowerEdge))
-                imgCrop2 = imgIn.crop((0,
-                                       upperEdge,
-                                       rightEdge,
-                                       lowerEdge))
-            elif rightEdge >= imgIn.width:
-                imgCrop1 = imgIn.crop((leftEdge,
-                                       upperEdge,
-                                       imgIn.width-1,
-                                       lowerEdge))
-                imgCrop2 = imgIn.crop((0,
-                                       upperEdge,
-                                       rightEdge-imgIn.width,
-                                       lowerEdge))
+                if leftEdge < 0:
+                    imgCrop1 = imgIn.crop((leftEdge+imgIn.width,
+                                           upperEdge,
+                                           imgIn.width-1,
+                                           lowerEdge))
+                    imgCrop2 = imgIn.crop((0,
+                                           upperEdge,
+                                           rightEdge,
+                                           lowerEdge))
+                elif rightEdge >= imgIn.width:
+                    imgCrop1 = imgIn.crop((leftEdge,
+                                           upperEdge,
+                                           imgIn.width-1,
+                                           lowerEdge))
+                    imgCrop2 = imgIn.crop((0,
+                                           upperEdge,
+                                           rightEdge-imgIn.width,
+                                           lowerEdge))
+                else:
+                    imgCrop1 = imgIn.crop((leftEdge,
+                                           upperEdge,
+                                           rightEdge,
+                                           lowerEdge))
+
+                imgToSave.paste(imgCrop1, (0, 0))
+                if imgCrop2 is not None:
+                    imgToSave.paste(imgCrop2, (imgCrop1.width, 0))
+
+                pix = imgToSave.load()
+
+                saveCenterW = imgToSave.width/2
+                saveCenterH = imgToSave.height/2
+                sqRad = 5
+
+                for x in range(saveCenterW-sqRad, saveCenterW+sqRad+1, 1):
+                    for y in range(saveCenterH+boxHeightOffset-sqRad,
+                                   saveCenterH+boxHeightOffset+sqRad+1, 1):
+                        pix[x, y] = (255, 0, 0)
+
+                imgToSave.save('./Output/Images/'+commonFilename+'_web.png')
+
+                lines.insert(insertIndex+6, '    \"![](../Images/' +
+                             commonFilename+'_web.png)\"\n')
             else:
-                imgCrop1 = imgIn.crop((leftEdge,
-                                       upperEdge,
-                                       rightEdge,
-                                       lowerEdge))
-
-            imgToSave.paste(imgCrop1, (0, 0))
-            if imgCrop2 is not None:
-                imgToSave.paste(imgCrop2, (imgCrop1.width, 0))
-
-            pix = imgToSave.load()
-
-            saveCenterW = imgToSave.width/2
-            saveCenterH = imgToSave.height/2
-            sqRad = 5
-
-            for x in range(saveCenterW-sqRad, saveCenterW+sqRad+1, 1):
-                for y in range(saveCenterH+boxHeightOffset-sqRad,
-                               saveCenterH+boxHeightOffset+sqRad+1, 1):
-                    pix[x, y] = (255, 0, 0)
-
-            imgToSave.save('./Output/Images/'+commonFilename+'_web.png')
-
-            lines.insert(insertIndex+6, '    \"![](../Images/' +
-                         commonFilename+'_web.png)\"\n')
+                lines.insert(insertIndex+6, '    \"\"\n')
             lines.insert(insertIndex+7, '   ]\n')
             lines.insert(insertIndex+8, '  }\n')
 
