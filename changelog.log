@@ -1,3 +1,6 @@
+version 1.0.8: 2/18/2016
+- Fixed a bug due to NASA images starting at 17.5 W instead of 0 E so images are now properly centered
+
 version 1.0.7: 2/17/2016
 - Added error handling for if the G5NR image cannot load
 - Added a few notes to the load notebook

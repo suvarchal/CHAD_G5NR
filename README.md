@@ -8,9 +8,9 @@ Author: Matthew Niznik (matthewniznik on Github)
 
 E-mail: matt@matthewniznik.com | mniznik@rsmas.miami.edu
 
-Version 1.0.7
+Version 1.0.8
 
-Date: 2016-02-17
+Date: 2016-02-18
 
 (Note: CHAD_G5NR is currently in Open Beta)
 

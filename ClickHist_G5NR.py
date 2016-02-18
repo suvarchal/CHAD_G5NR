@@ -21,7 +21,7 @@ import sys
 
 __author__ = 'niznik'
 __clickHistImpName__ = 'CHAD G5NR'
-__version__ = '1.0.7'
+__version__ = '1.0.8'
 __chversion__ = '1.0.0'
 
 

@@ -384,13 +384,18 @@ class ClickHistDo:
                 outImageWidthHalf = int(imgIn.width*(30./360.))
                 outImageHeightHalf = int(imgIn.height*(15./180.))
 
-                cropCentX = int((inputLon/360.)*imgIn.width)
+                # NASA images start at 17.5 W, not 0 E so we need to account
+                # for that. Pulled out the numerator to make things clearer.
+                lonOffset = 17.5
+                numForCentX = (inputLon+lonOffset) % 360
+
+                cropCentX = int((numForCentX/360.)*imgIn.width)
                 cropCentY = int((-1.*(inputLat-90.)/180.)*imgIn.height)
                 centToEdgeX = outImageWidthHalf
                 centToEdgeY = outImageHeightHalf
 
                 imgToSave = Image.new("RGB", (outImageWidthHalf*2,
-                                          outImageHeightHalf*2))
+                                              outImageHeightHalf*2))
 
                 leftEdge = cropCentX-centToEdgeX
                 rightEdge = cropCentX+centToEdgeX
