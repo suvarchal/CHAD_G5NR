@@ -1,3 +1,6 @@
+version 1.0.11: 2/19/2016
+- Added a success message to indicate the templatizer succeeded
+
 version 1.0.10: 2/19/2016
 - Added a notebook that pre-processes IDV bundle files for use as template (still can be run on command line as well)
 - Added lxml requirement to environments

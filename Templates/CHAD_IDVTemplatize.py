@@ -112,6 +112,10 @@ def templatize(inFile, outFile):
     # Output results
     tree.write(outFile,xml_declaration=True,encoding='ISO-8859-1')
 
+    # Inform user of success
+    print('File \''+inFile+'\'')
+    print('successfully processed into \''+outFile+'\'')
+
 # This method just simplifies some of the text when looking for
 # matches in the XML
 def doesAttribMatch(item,attrib,inquiry):
