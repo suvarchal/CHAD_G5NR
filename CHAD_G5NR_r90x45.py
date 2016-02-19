@@ -78,7 +78,7 @@ urlToLoad = ('https://weather.rsmas.miami.edu/repository/'+
 # ### Now let's get some information on the variables you want
 # 
 # **For this data, we've preprogrammed all of the units and data into a module so you just have to pick from a list of options (case sensitive):**<br>
-# Precip, W500, wPuP, TEEF, SKEDot, HMV
+# Precip, W500, wPuP, TEEF, ZSKEDot, HMV
 
 # In[ ]:
 
@@ -88,8 +88,8 @@ var2Name = 'W500'
 
 # ### What kind of snapshot from the [online G5NR repository](http://g5nr.nccs.nasa.gov/images/) of pre-made images would you like?
 # 
-# **Options:** 'aerosols', 'carbon', 'cloudsir', 'cloudsvis', 'cyclones', 'epv', 'storms', 'temperature', 'tropical', 'water', 'winds'
-# <br>*N.B. Must be a list. If more than one is given, multiple links will be output but only the first will be saved locally.*
+# **Options:** 'cloudsir', 'cloudsvis', 'cyclones', 'storms', 'temperature', 'tropical', 'water', 'winds'
+# <br>*N.B. Must be a list.*
 
 # In[ ]:
 
