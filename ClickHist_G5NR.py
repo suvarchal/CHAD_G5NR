@@ -21,7 +21,7 @@ import sys
 
 __author__ = 'niznik'
 __clickHistImpName__ = 'CHAD G5NR'
-__version__ = '1.0.9'
+__version__ = '1.0.10'
 __chversion__ = '1.0.0'
 
 
@@ -44,7 +44,7 @@ class ClickHist:
 
         # Make sure the tmp directory exists for mostRecentCH.png
         if not os.path.exists('./Output/'):
-            call('mkdir ./Output/Tmp/', shell=True)
+            call('mkdir ./Output/', shell=True)
 
         if not os.path.exists('./Output/Tmp/'):
             call('mkdir ./Output/Tmp/', shell=True)

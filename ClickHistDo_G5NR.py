@@ -158,7 +158,7 @@ class ClickHistDo:
         # Grab the current Unix/Epoch time as a placeholder tag for the
         # temporary results
         currentUnixTime = str(int(time.time()))
-        basisBundleFile = './Output/Templates/'+self.bundleInFilename
+        basisBundleFile = './Templates/'+self.bundleInFilename
         tempBundleFile = './Output/Tmp/tempBundle_'+currentUnixTime+'.xidv'
 
         # Determine the longitude, latitude, and time of the point passed
@@ -304,7 +304,7 @@ class ClickHistDo:
         print('Saved!')
 
         # Now create the ISL file - a bit less involved
-        basisISL = './Output/Templates/idvMovieOutput_fillIn.isl'
+        basisISL = './Templates/idvMovieOutput_fillIn.isl'
         tempISL = './Output/Scripts/idvImZIDVOutput_'+commonFilename+'.isl'
 
         # Process a few replacements via sed
@@ -329,7 +329,7 @@ class ClickHistDo:
 
         if(os.path.isfile('./Output/CaseNotebooks/' +
                           self.caseNotebookFilename) == False):
-            call('cp ./Output/Templates/caseNotebookTemplate.ipynb ' +
+            call('cp ./Templates/caseNotebookTemplate.ipynb ' +
                  './Output/CaseNotebooks/'+self.caseNotebookFilename,
                  shell=True)
 

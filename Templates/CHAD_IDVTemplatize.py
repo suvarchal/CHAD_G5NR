@@ -10,17 +10,12 @@
 #
 # Arg1: File to be processed
 # Arg2: Output File
+#
+# This can also be done in the CHAD_IDVTemplatize notebook
+# using this as a module
 
 from lxml import etree as ET
 import sys
-
-# Get the input and output filenames from user input
-inFile = str(sys.argv[1])
-outFile = str(sys.argv[2])
-
-# Parse the xml from the .xidv input and get the root
-tree = ET.parse(inFile)
-root = tree.getroot()
 
 # Current recommended 'dummy' values for longitude, latitude,
 # and time in the bundles
@@ -42,6 +37,17 @@ startOffset_value = '-119.87654321'
 endOffset_value = '361.23456789'
 
 def main():
+
+    # Get the input and output filenames from user input
+    inFile = str(sys.argv[1])
+    outFile = str(sys.argv[2])
+
+    templatize(inFile, outFile)
+
+def templatize(inFile, outFile):
+
+    tree = ET.parse(inFile)
+    root = tree.getroot()
 
     for item in root.iter('object'):
 

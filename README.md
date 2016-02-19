@@ -8,7 +8,7 @@ Author: Matthew Niznik (matthewniznik on Github)
 
 E-mail: matt@matthewniznik.com | mniznik@rsmas.miami.edu
 
-Version 1.0.9
+Version 1.0.10
 
 Date: 2016-02-19
 
