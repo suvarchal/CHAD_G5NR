@@ -21,7 +21,7 @@ import sys
 
 __author__ = 'niznik'
 __clickHistImpName__ = 'CHAD G5NR'
-__version__ = '1.0.11'
+__version__ = '1.1.0'
 __chversion__ = '1.0.0'
 
 
@@ -502,7 +502,16 @@ class ClickHist:
         # There is currently no implemented method to change all of the
         # fractional paramters if the window is resized, so clicking would
         # break
-        plt.get_current_fig_manager().window.resizable(False,False)
+        print('(Using '+plt.get_backend()+')')
+        if plt.get_backend() == 'Qt4Agg':
+            plt.get_current_fig_manager().window.setFixedSize(self.figXPixelsReq,
+                                                              self.figYPixelsReq)
+            plt.get_current_fig_manager().window.statusBar().hide()
+        elif plt.get_backend() == 'TkAgg':
+            plt.get_current_fig_manager().window.resizable(False, False)
+        else:
+            print('Warning - undetected figure manager. Resizing window ' +
+                  'will result in unexpected behavior')
 
         # Display text with the current version and any other messages
         self.figure.text(0.01, 0.0225,

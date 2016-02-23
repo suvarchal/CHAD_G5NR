@@ -1,3 +1,12 @@
+version 1.1.0: 2/22/2016
+- Allow for multiple bundle templates to be processed
+- Bundle output now has a tag so that the basis bundle can be recognized
+- A new Case Notebook is now generated for each case instead of appending to one notebook
+- Case notebook is of type JyIDV
+- All image types specified in the loading notebook are now saved in the Case Notebook
+- Switched default graphics to Qt4Agg, though tk is still useable (though errors may crop up in newer matplotlib)
+- Other minor output and logistical tweaks
+
 version 1.0.11: 2/19/2016
 - Added a success message to indicate the templatizer succeeded
 

@@ -21,16 +21,17 @@
 
 # In[ ]:
 
-bundleInFilename = 'ClickHist_NewAggG5NRtemplate_smallarea.xidv'
+bundleInFilenames = ['G5NR_template_simple_cloudsir','G5NR_template_full']
+bundleOutTags = ['simple','full']
 
 
-# ## Now, pick a filename for this session's *Case Notebook*.
+# ## Now, pick a Tag for this session's *Case Notebooks*.
 # #### This is a notebook that will be generated separately from this one containing snapshots of ClickHists and other images related to each case you select.
 # This way, without much extra effort you can remember what you were working on!
 
 # In[ ]:
 
-caseNotebookFilename = 'myFirstSession'
+caseNotebookFilename = 'Feb22'
 
 
 # ## (2) Set the variables, data sources, and other necessary information.
@@ -89,11 +90,11 @@ var2Name = 'W500'
 # ### What kind of snapshot from the [online G5NR repository](http://g5nr.nccs.nasa.gov/images/) of pre-made images would you like?
 # 
 # **Options:** 'cloudsir', 'cloudsvis', 'cyclones', 'storms', 'temperature', 'tropical', 'water', 'winds'
-# <br>*N.B. Must be a list.*
+# <br>*N.B. Must be a list. If image saving time is prohibitively long, shorten the list of variables.*
 
 # In[ ]:
 
-imageVar = ['storms', 'temperature']
+imageVar = ['cloudsir']
 
 
 # ### Set how large you want the IDV bundle to be in space and time
@@ -109,11 +110,15 @@ dtFromCenter = 3*3600
 
 # ### Import the necessary modules needed for CHAD to work
 
+# *Currently supported graphics backends are Qt4Agg ('qt4') and TK ('tk')*
+
 # In[ ]:
 
-get_ipython().magic(u'matplotlib tk')
+#%matplotlib tk
+get_ipython().magic(u'matplotlib qt4')
 import matplotlib
 #matplotlib.use('TkAgg')
+#matplotlib.use('Qt4Agg')
 
 from IPython.display import clear_output
 import netCDF4
@@ -224,7 +229,8 @@ cdfIn.close()
 
 ClickHistDo1 = ClickHistDo.ClickHistDo(lonValues,latValues,
                                        timeValues,startDatetime,
-                                       bundleInFilename,
+                                       bundleInFilenames,
+                                       bundleOutTags,
                                        caseNotebookFilename,
                                        xVarName=var1Name,
                                        yVarName=var2Name,
@@ -241,7 +247,7 @@ ClickHistDo1 = ClickHistDo.ClickHistDo(lonValues,latValues,
 
 # In[ ]:
 
-get_ipython().magic(u'qtconsole')
+#%qtconsole
 ClickHist1 = ClickHist.ClickHist(var1Edges,var2Edges,
                                  var1Values,var2Values,
                                  xVarName=var1Name,yVarName=var2Name,

@@ -19,8 +19,8 @@ __author__ = 'niznik'
 
 class ClickHistDo:
     def __init__(self, lons, lats, times,
-                 startDatetime, bundle,
-                 caseNotebookFilename, **kwargs):
+                 startDatetime, bundles, bundleTags,
+                 caseNotebookFilenameTag, **kwargs):
 
         """
         Initializes the ClickHistDo.
@@ -71,11 +71,13 @@ class ClickHistDo:
         self.latOffset = 5.0
         self.dtFromCenter = (2*3600)*1000
 
-        # Set name of bundle template to alter
-        self.bundleInFilename = bundle
+        # Set name of bundle templates to alter
+        # Also give tags so that the outFiles will be distinguishable
+        self.bundleInFilenames = bundles
+        self.bundleOutTags = bundleTags
 
         # Set name of the case notebook file
-        self.caseNotebookFilename = caseNotebookFilename+'.ipynb'
+        self.caseNotebookFilenameTag = caseNotebookFilenameTag
 
         self.openTab = False
         if 'openTab' in kwargs:
@@ -153,13 +155,19 @@ class ClickHistDo:
             call('mkdir ./Output/Images/', shell=True)
 
         # Notify the user that the processing has begun
-        print('Saving IDV bundle...')
+        print('Saving IDV bundle(s)...')
 
         # Grab the current Unix/Epoch time as a placeholder tag for the
-        # temporary results
+        # temporary results and create lists that can be iterated in the
+        # event of more than one bundle template
+        basisBundleFiles = []
+        tempBundleFiles = []
         currentUnixTime = str(int(time.time()))
-        basisBundleFile = './Templates/'+self.bundleInFilename
-        tempBundleFile = './Output/Tmp/tempBundle_'+currentUnixTime+'.xidv'
+        for ii in range(0, len(self.bundleInFilenames)):
+            basisBundleFiles.append('./Templates/' +
+                                    self.bundleInFilenames[ii] + '.xidv')
+            tempBundleFiles.append('./Output/Tmp/tempBundle_' +
+                                   currentUnixTime+str(ii)+'.xidv')
 
         # Determine the longitude, latitude, and time of the point passed
         # to Do
@@ -173,6 +181,17 @@ class ClickHistDo:
 
         # Inform the user of the time and location of the point
         # And if passed, the values of X and Y as well
+        timeString = str(inputDatetime)
+        locationString = ("{:3.0f}".format(inputLon)+' E ' +
+                          "{:2.0f}".format(inputLat)+' N')
+        xyValString = ''
+        if 'xyVals' in kwargs:
+            xyValString = kwargs['xyVals']
+        perString = ''
+        if ('xPer' in kwargs) and ('yPer' in kwargs):
+            perString = ('x%: '+"{:2.3f}".format(kwargs['xPer'])+' ' +
+                         'y%: '+"{:2.3f}".format(kwargs['yPer']))
+
         print(inputDatetime)
         print("{:3.0f}".format(inputLon)+' E '+"{:2.0f}".format(inputLat)+' N')
         if 'xyVals' in kwargs:
@@ -181,7 +200,7 @@ class ClickHistDo:
             print('x%: '+"{:2.3f}".format(kwargs['xPer'])+' ' +
                   'y%: '+"{:2.3f}".format(kwargs['yPer']))
 
-        urlSave = ''
+        urlSave = []
         for ii in range(0, len(self.imageVar)):
 
             url = ('http://g5nr.nccs.nasa.gov/static/naturerun/fimages/' +
@@ -196,12 +215,12 @@ class ClickHistDo:
                    '_'+"{:02d}".format(inputDatetime.hour) +
                    "{:02d}".format(inputDatetime.minute) +
                    'z.png')
-            if ii == 0:
-                urlSave = url
+            urlSave.append(url)
 
             print('\nLink to '+self.imageVar[ii]+' image: '+url)
             if self.openTab is True:
                 webbrowser.open(url, new=1)
+        print('')
 
         # Based on the lon, lat, and time, determine all necessary input
         # to create an .xidv bundle
@@ -228,7 +247,17 @@ class ClickHistDo:
                           "{:005.0f}".format(min(1000*self.yPer, 99999))+'_' +
                           str("%03i"%inputLon)+'_'+str("%02i"%inputLat)+'_' +
                           timeTag)
-        finalBundleFile = './Output/GeneratedBundles/'+commonFilename+'.xidv'
+
+        # The flag for dealing with backup in OS X and Linux is different
+        # Set it here based on the OS that was determined upon initialization
+        backupTag = ''
+        if self.os.startswith('darwin'):
+            backupTag = '-i \'.bckp\''
+        elif self.os.startswith('linux'):
+            backupTag = '-i.bckp'
+        else:
+            print('Unsupported OS detected')
+            print('Functionality might not work as intended...')
 
         # Preset longitude dummy values in the .xidv template to be
         # replaced by the values calculated above
@@ -252,56 +281,75 @@ class ClickHistDo:
         endOffsetFiller = '361.23456789'
         metadataFiller = 'replaceme_METADATASTRING_replaceme'
 
-        # The flag for dealing with backup in OS X and Linux is different
-        # Set it here based on the OS that was determined upon initialization
-        backupTag = ''
-        if self.os.startswith('darwin'):
-            backupTag = '-i \'.bckp\''
-        elif self.os.startswith('linux'):
-            backupTag = '-i.bckp'
-        else:
-            print('Unsupported OS detected')
-            print('Functionality might not work as intended...')
+        # change finalBundleFile to a list of filenames and loop over them
+        finalBundles = []
+        for ii in range(0, len(basisBundleFiles)):
 
-        # Each call to sed here replaces one of the dummy lon/lat/time values
-        # with the values appropriate to the passed data point
-        call('sed \'s/'+minLonFiller+'/'+westLon+'/\' '+basisBundleFile +
-             ' > '+tempBundleFile, shell=True)
-        call('sed '+backupTag+' \'s/'+maxLonFiller+'/'+eastLon+'/\' ' +
-             tempBundleFile, shell=True)
-        call('sed '+backupTag+' \'s/'+minLatFiller+'/'+southLat+'/\' ' +
-             tempBundleFile, shell=True)
-        call('sed '+backupTag+' \'s/'+maxLatFiller+'/'+northLat+'/\' ' +
-             tempBundleFile, shell=True)
-        call('sed '+backupTag+' \'s/'+centerLonFiller+'/'+str(inputLon) +
-             '/\' '+tempBundleFile, shell=True)
-        call('sed '+backupTag+' \'s/'+centerLatFiller+'/'+str(inputLat) +
-             '/\' '+tempBundleFile, shell=True)
-        call('sed '+backupTag+' \'s/'+lonLenFiller+'/'+str(self.lonOffset*2) +
-             '/\' '+tempBundleFile, shell=True)
-        call('sed '+backupTag+' \'s/'+latLenFiller+'/'+str(self.latOffset*2) +
-             '/\' '+tempBundleFile, shell=True)
-        call('sed '+backupTag+' \'s/'+incLonFiller+'/'+str(self.lonOffset/2.) +
-             '/\' '+tempBundleFile, shell=True)
-        call('sed '+backupTag+' \'s/'+incLatFiller+'/'+str(self.latOffset/2.) +
-             '/\' '+tempBundleFile, shell=True)
-        call('sed '+backupTag+' \'s/'+startTimeFiller+'/'+startTime+'/\' ' +
-             tempBundleFile, shell=True)
-        call('sed '+backupTag+' \'s/'+endTimeFiller+'/'+endTime+'/\' ' +
-             tempBundleFile, shell=True)
-        call('sed '+backupTag+' \'s/'+startOffsetFiller+'/'+startOffset +
-             '/\' '+tempBundleFile, shell=True)
-        call('sed '+backupTag+' \'s/'+endOffsetFiller+'/'+endOffset+'/\' ' +
-             tempBundleFile, shell=True)
-        call('sed '+backupTag+' \'s/'+metadataFiller+'/'+self.metadata+'/\' ' +
-             tempBundleFile, shell=True)
+            finalBundleFile = ('./Output/GeneratedBundles/' +
+                               commonFilename+'_' +
+                               self.bundleOutTags[ii]+'.xidv')
+            finalBundles.append('../GeneratedBundles/' +
+                                commonFilename+'_' +
+                                self.bundleOutTags[ii]+'.xidv')
 
-        # Save the bundle with a recognizable filename
-        call('mv '+tempBundleFile+' '+finalBundleFile, shell=True)
-        call('rm '+tempBundleFile+'.bckp', shell=True)
+            # The flag for dealing with backup in OS X and Linux is different
+            # Set it here based on the OS that was determined upon
+            # initialization
+            backupTag = ''
+            if self.os.startswith('darwin'):
+                backupTag = '-i \'.bckp\''
+            elif self.os.startswith('linux'):
+                backupTag = '-i.bckp'
+            else:
+                print('Unsupported OS detected')
+                print('Functionality might not work as intended...')
 
-        # Inform the user of success
-        print('Saved!')
+            # Each call to sed here replaces one of the dummy lon/lat/time
+            # values with the values appropriate to the passed data point
+            call('sed \'s/'+minLonFiller+'/'+westLon+'/\' ' +
+                 basisBundleFiles[ii] + ' > '+tempBundleFiles[ii],
+                 shell=True)
+            call('sed '+backupTag+' \'s/'+maxLonFiller+'/'+eastLon+'/\' ' +
+                 tempBundleFiles[ii], shell=True)
+            call('sed '+backupTag+' \'s/'+minLatFiller+'/'+southLat+'/\' ' +
+                 tempBundleFiles[ii], shell=True)
+            call('sed '+backupTag+' \'s/'+maxLatFiller+'/'+northLat+'/\' ' +
+                 tempBundleFiles[ii], shell=True)
+            call('sed '+backupTag+' \'s/'+centerLonFiller+'/'+str(inputLon) +
+                 '/\' '+tempBundleFiles[ii], shell=True)
+            call('sed '+backupTag+' \'s/'+centerLatFiller+'/'+str(inputLat) +
+                 '/\' '+tempBundleFiles[ii], shell=True)
+            call('sed '+backupTag+' \'s/'+lonLenFiller+'/' +
+                 str(self.lonOffset*2) + '/\' '+tempBundleFiles[ii],
+                 shell=True)
+            call('sed '+backupTag+' \'s/'+latLenFiller+'/' +
+                 str(self.latOffset*2) + '/\' '+tempBundleFiles[ii],
+                 shell=True)
+            call('sed '+backupTag+' \'s/'+incLonFiller+'/' +
+                 str(self.lonOffset/2.) + '/\' '+tempBundleFiles[ii],
+                 shell=True)
+            call('sed '+backupTag+' \'s/'+incLatFiller+'/' +
+                 str(self.latOffset/2.) + '/\' '+tempBundleFiles[ii],
+                 shell=True)
+            call('sed '+backupTag+' \'s/'+startTimeFiller+'/'+startTime +
+                 '/\' ' + tempBundleFiles[ii], shell=True)
+            call('sed '+backupTag+' \'s/'+endTimeFiller+'/'+endTime+'/\' ' +
+                 tempBundleFiles[ii], shell=True)
+            call('sed '+backupTag+' \'s/'+startOffsetFiller+'/'+startOffset +
+                 '/\' '+tempBundleFiles[ii], shell=True)
+            call('sed '+backupTag+' \'s/'+endOffsetFiller+'/'+endOffset +
+                 '/\' ' + tempBundleFiles[ii], shell=True)
+            call('sed '+backupTag+' \'s/'+metadataFiller+'/'+self.metadata +
+                 '/\' ' + tempBundleFiles[ii], shell=True)
+
+            # Save the bundle with a recognizable filename
+            call('mv '+tempBundleFiles[ii]+' '+finalBundleFile, shell=True)
+            call('rm '+tempBundleFiles[ii]+'.bckp', shell=True)
+
+            # Inform the user of success
+            print('Bundle \''+self.bundleOutTags[ii]+'\' Saved!')
+
+        print('')
 
         # Now create the ISL file - a bit less involved
         basisISL = './Templates/idvMovieOutput_fillIn.isl'
@@ -320,157 +368,199 @@ class ClickHistDo:
         # Clean up backup files
         call('rm '+tempISL+'.bckp', shell=True)
 
-        # Add to the Case Notebook!
-        print('Adding to Case Notebook ('+self.caseNotebookFilename +
+        # Create a Case Notebook!
+        caseNotebookFilename = (self.caseNotebookFilenameTag + '_' +
+                                commonFilename+'.ipynb')
+
+        print('Creating Case Notebook ('+caseNotebookFilename +
               ')')
 
         if not os.path.exists('./Output/CaseNotebooks/'):
             call('mkdir ./Output/CaseNotebooks', shell=True)
 
         if(os.path.isfile('./Output/CaseNotebooks/' +
-                          self.caseNotebookFilename) == False):
-            call('cp ./Templates/caseNotebookTemplate.ipynb ' +
-                 './Output/CaseNotebooks/'+self.caseNotebookFilename,
-                 shell=True)
+                          caseNotebookFilename) == True):
+            print('Notebook previously created - returning...')
+            return
+
+        call('cp ./Templates/caseNotebookTemplate.ipynb ' +
+             './Output/CaseNotebooks/'+caseNotebookFilename, shell=True)
+
+        # sed-ing
+        pathToCaseNB = './Output/CaseNotebooks/'+caseNotebookFilename
+
+        date = str(datetime.datetime.now().replace(second=0,
+                                                   microsecond=0))
+        call('sed '+backupTag+' \'s/INSERT_DATE/'+date+'/\' ' +
+             pathToCaseNB, shell=True)
+        call('rm '+pathToCaseNB+'.bckp', shell=True)
 
         inFile = open('./Output/CaseNotebooks/' +
-                      self.caseNotebookFilename, 'r')
+                      caseNotebookFilename, 'r')
         lines = inFile.readlines()
         inFile.close()
 
-        insertIndex = -1
+        # Add case metadata
+        insertIndexMeta = -1
+        for ll in range(0, len(lines)-1):
+            if 'Quick Stats' in lines[ll]:
+                insertIndexMeta = ll
+
+        lines[insertIndexMeta] += ','
+        lines.insert(insertIndexMeta+1, '    \"'+timeString+'<br>\",\n')
+        lines.insert(insertIndexMeta+2, '    \"'+locationString+'<br>\",\n')
+        lines.insert(insertIndexMeta+3, '    \"'+xyValString+'<br>\",\n')
+        lines.insert(insertIndexMeta+4, '    \"'+perString+'<br>\"\n')
+
+        # Add the load calls for all generated bundles
+        insertIndexLoad = -1
+        for ll in range(0, len(lines)-1):
+            if 'loadBundle()' in lines[ll]:
+                insertIndexLoad = ll
+
+        lines[insertIndexLoad] = ('    \"#loadBundle(\''+finalBundles[0] +
+                                  '\')\\n\",\n')
+        for bb in range(1, len(finalBundles)):
+            lines.insert(insertIndexLoad+bb, '    \"#loadBundle(\'' +
+                         finalBundles[bb]+'\')\\n\"')
+            if bb != len(finalBundles)-1:
+                lines[insertIndexLoad+bb] += ','
+            lines[insertIndexLoad+bb] += '\n'
+
+        # Add images at the very end of the Case Notebook
+        insertIndexEnd = -1
         for ll in range(0, len(lines)-1):
             if lines[ll] == ' ],\n' and lines[ll+1] == ' \"metadata\": {\n':
-                insertIndex = ll
+                insertIndexEnd = ll
 
-        if insertIndex == -1:
+        if insertIndexEnd == -1:
             print('ClickHistDo could not read the Case Notebook properly. ' +
                   'Not recording...')
         else:
 
-            # Future implementation
-            # Instead of being held hostage by manual index insertion,
-            # create an list/tuple of the lines to insert and then do them
-            # in a final loop
-            # Then you can call `lines.insert(ii+constant, newLine[ii])
-            # or something similar
-
-            lines[insertIndex-1] = lines[insertIndex-1][0:3]+',' +\
-                                   lines[insertIndex-1][3:]
-            lines.insert(insertIndex, '  {\n')
-            lines.insert(insertIndex+1, '   \"cell_type\":' +
-                         ' \"markdown\",\n')
-            lines.insert(insertIndex+2, '   \"metadata\": {},\n')
-            lines.insert(insertIndex+3, '   \"source\": [\n')
-
             call('cp ./Output/Tmp/mostRecentCH.png ./Output/Images/' +
                  commonFilename+'_CH.png', shell=True)
 
-            lines.insert(insertIndex+4, '    \"**File:** `' +
-                         commonFilename+'`\",\n')
-            lines.insert(insertIndex+5, '    \"![](../Images/' +
-                         commonFilename+'_CH.png)\",\n')
+            linesToAdd = []
+            self.appendCellStart(linesToAdd, 'markdown')
+            linesToAdd.append('    \"**Common Filename:** `' +
+                              commonFilename+'`\",\n')
+            linesToAdd.append('    \"![](../Images/' + commonFilename +
+                              '_CH.png)\"\n')
+            self.appendCellEnd(linesToAdd, False)
 
-            imageLoaded = 1
-            try:
-                imgFile = StringIO.StringIO(urllib.urlopen(urlSave).read())
-                imgIn = Image.open(imgFile)
-            except IOError:
-                print('Couldn\'t open the G5NR image...is the server down?')
-                print('(Not saving image file)')
-                imageLoaded = 0
+            for ii in range(0, len(self.imageVar)):
 
-            if imageLoaded == 1:
-                outImageWidthHalf = int(imgIn.width*(30./360.))
-                outImageHeightHalf = int(imgIn.height*(15./180.))
+                imageLoaded = 1
+                try:
+                    imgFile = StringIO.StringIO(urllib.urlopen(urlSave[ii]).read())
+                    imgIn = Image.open(imgFile)
+                except IOError:
+                    print('Couldn\'t open the G5NR image...is the server down?')
+                    print('(Not saving image file)')
+                    imageLoaded = 0
 
-                # NASA images start at 17.5 W, not 0 E so we need to account
-                # for that. Pulled out the numerator to make things clearer.
-                lonOffset = 17.5
-                numForCentX = (inputLon+lonOffset) % 360
+                if imageLoaded == 1:
+                    outImageWidthHalf = int(imgIn.width*(30./360.))
+                    outImageHeightHalf = int(imgIn.height*(15./180.))
 
-                cropCentX = int((numForCentX/360.)*imgIn.width)
-                cropCentY = int((-1.*(inputLat-90.)/180.)*imgIn.height)
-                centToEdgeX = outImageWidthHalf
-                centToEdgeY = outImageHeightHalf
+                    # NASA images start at 17.5 W, not 0 E so we need to account
+                    # for that. Pulled out the numerator to make things clearer.
+                    lonOffset = 17.5
+                    numForCentX = (inputLon+lonOffset) % 360
 
-                imgToSave = Image.new("RGB", (outImageWidthHalf*2,
-                                              outImageHeightHalf*2))
+                    cropCentX = int((numForCentX/360.)*imgIn.width)
+                    cropCentY = int((-1.*(inputLat-90.)/180.)*imgIn.height)
+                    centToEdgeX = outImageWidthHalf
+                    centToEdgeY = outImageHeightHalf
 
-                leftEdge = cropCentX-centToEdgeX
-                rightEdge = cropCentX+centToEdgeX
-                upperEdge = cropCentY-centToEdgeY
-                lowerEdge = cropCentY+centToEdgeY
+                    imgToSave = Image.new("RGB", (outImageWidthHalf*2,
+                                                  outImageHeightHalf*2))
 
-                boxHeightOffset = 0
+                    leftEdge = cropCentX-centToEdgeX
+                    rightEdge = cropCentX+centToEdgeX
+                    upperEdge = cropCentY-centToEdgeY
+                    lowerEdge = cropCentY+centToEdgeY
 
-                if lowerEdge >= imgIn.height:
-                    boxHeightOffset = lowerEdge - imgIn.height
-                    lowerEdge = imgIn.height-1
-                    upperEdge = lowerEdge-centToEdgeY*2
-                elif upperEdge < 0:
-                    boxHeightOffset = upperEdge
-                    upperEdge = 0
-                    lowerEdge = upperEdge+centToEdgeY*2
+                    boxHeightOffset = 0
 
-                imgCrop1, imgCrop2 = None, None
+                    if lowerEdge >= imgIn.height:
+                        boxHeightOffset = lowerEdge - imgIn.height
+                        lowerEdge = imgIn.height-1
+                        upperEdge = lowerEdge-centToEdgeY*2
+                    elif upperEdge < 0:
+                        boxHeightOffset = upperEdge
+                        upperEdge = 0
+                        lowerEdge = upperEdge+centToEdgeY*2
 
-                if leftEdge < 0:
-                    imgCrop1 = imgIn.crop((leftEdge+imgIn.width,
-                                           upperEdge,
-                                           imgIn.width-1,
-                                           lowerEdge))
-                    imgCrop2 = imgIn.crop((0,
-                                           upperEdge,
-                                           rightEdge,
-                                           lowerEdge))
-                elif rightEdge >= imgIn.width:
-                    imgCrop1 = imgIn.crop((leftEdge,
-                                           upperEdge,
-                                           imgIn.width-1,
-                                           lowerEdge))
-                    imgCrop2 = imgIn.crop((0,
-                                           upperEdge,
-                                           rightEdge-imgIn.width,
-                                           lowerEdge))
-                else:
-                    imgCrop1 = imgIn.crop((leftEdge,
-                                           upperEdge,
-                                           rightEdge,
-                                           lowerEdge))
+                    imgCrop1, imgCrop2 = None, None
 
-                imgToSave.paste(imgCrop1, (0, 0))
-                if imgCrop2 is not None:
-                    imgToSave.paste(imgCrop2, (imgCrop1.width, 0))
+                    if leftEdge < 0:
+                        imgCrop1 = imgIn.crop((leftEdge+imgIn.width,
+                                               upperEdge,
+                                               imgIn.width-1,
+                                               lowerEdge))
+                        imgCrop2 = imgIn.crop((0,
+                                               upperEdge,
+                                               rightEdge,
+                                               lowerEdge))
+                    elif rightEdge >= imgIn.width:
+                        imgCrop1 = imgIn.crop((leftEdge,
+                                               upperEdge,
+                                               imgIn.width-1,
+                                               lowerEdge))
+                        imgCrop2 = imgIn.crop((0,
+                                               upperEdge,
+                                               rightEdge-imgIn.width,
+                                               lowerEdge))
+                    else:
+                        imgCrop1 = imgIn.crop((leftEdge,
+                                               upperEdge,
+                                               rightEdge,
+                                               lowerEdge))
 
-                pix = imgToSave.load()
+                    imgToSave.paste(imgCrop1, (0, 0))
+                    if imgCrop2 is not None:
+                        imgToSave.paste(imgCrop2, (imgCrop1.width, 0))
 
-                saveCenterW = imgToSave.width/2
-                saveCenterH = imgToSave.height/2
-                sqRad = 5
+                    pix = imgToSave.load()
 
-                for x in range(saveCenterW-sqRad, saveCenterW+sqRad+1, 1):
-                    for y in range(saveCenterH+boxHeightOffset-sqRad,
-                                   saveCenterH+boxHeightOffset+sqRad+1, 1):
-                        pix[x, y] = (255, 0, 0)
+                    saveCenterW = imgToSave.width/2
+                    saveCenterH = imgToSave.height/2
+                    sqRad = 5
 
-                imgToSave.save('./Output/Images/'+commonFilename+'_web.png')
+                    for x in range(saveCenterW-sqRad, saveCenterW+sqRad+1, 1):
+                        for y in range(saveCenterH+boxHeightOffset-sqRad,
+                                       saveCenterH+boxHeightOffset+sqRad+1, 1):
+                            pix[x, y] = (255, 0, 0)
 
-                lines.insert(insertIndex+6, '    \"![](../Images/' +
-                             commonFilename+'_web.png)\"\n')
-            else:
-                lines.insert(insertIndex+6, '    \"\"\n')
-            lines.insert(insertIndex+7, '   ]\n')
-            lines.insert(insertIndex+8, '  }\n')
+                    saveFilename = (commonFilename + '_' + self.imageVar[ii] +
+                                    '.png')
 
-            outFile = open('./Output/Tmp/'+self.caseNotebookFilename, 'w')
+                    imgToSave.save('./Output/Images/' + saveFilename)
+
+                    self.appendCellStart(linesToAdd, 'markdown')
+                    linesToAdd.append('    \"![](../Images/' +
+                                      saveFilename+')\"\n')
+                    if ii == len(self.imageVar)-1:
+                        self.appendCellEnd(linesToAdd, True)
+                    else:
+                        self.appendCellEnd(linesToAdd, False)
+
+            # Need to manually edit the last line of the last cell to tell it
+            # there's more coming...
+            lines[insertIndexEnd-1] = lines[insertIndexEnd-1][0:3]+',' +\
+                                   lines[insertIndexEnd-1][3:]
+            for ll in range(0, len(linesToAdd)):
+                lines.insert(insertIndexEnd+ll, linesToAdd[ll])
+
+            outFile = open('./Output/Tmp/'+caseNotebookFilename, 'w')
             outFile.writelines(lines)
             outFile.close()
-            call('mv ./Output/Tmp/'+self.caseNotebookFilename +
-                 ' ./Output/CaseNotebooks/'+self.caseNotebookFilename,
-                 shell=True)
+            call('mv ./Output/Tmp/'+caseNotebookFilename +
+                 ' ./Output/CaseNotebooks/'+caseNotebookFilename, shell=True)
 
-        print('Case Notebook updated!')
+        print('Case Notebook created!')
 
         return
 
@@ -504,3 +594,20 @@ class ClickHistDo:
         latIndex = (flatIndex/self.lonLen)%self.latLen
         timeIndex = flatIndex/(self.lonLen*self.latLen)
         return lonIndex, latIndex, timeIndex
+
+    def appendCellStart(self, lineList, cellType):
+
+        lineList.append('  {\n',)
+        lineList.append('   \"cell_type\": \"'+cellType+'\",\n')
+        lineList.append('   \"metadata\": {},\n')
+        lineList.append('   \"source\": [\n')
+
+    def appendCellEnd(self, lineList, lastCell):
+
+        lineList.append('   ]\n')
+
+        if lastCell is False:
+            lineList.append('  },\n')
+        else:
+            lineList.append('  }\n')
+
