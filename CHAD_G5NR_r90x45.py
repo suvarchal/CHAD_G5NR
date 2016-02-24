@@ -17,12 +17,12 @@
 # ## (1) Setting Input/Output Files
 # ## First, you need to chose the *template* bundle.
 # ### This is an IDV bundle with your desired data and displays that ClickHist will alter to focus on the time and location relevant to scatter points you select.
-# Provided by default is the default bundle for GEOS5 - it contains many thermodynamic variables related to precipitation and much finer resolution than our course ClickHist data that we'll load soon.
+# **Note:** The first bundle in both lists here will be the one referenced in the later script that generates images, movies, and a .zidv file. It should probably be the "full" bundle with the variables you want to study.
 
 # In[ ]:
 
-bundleInFilenames = ['G5NR_template_simple_cloudsir','G5NR_template_full']
-bundleOutTags = ['simple','full']
+bundleInFilenames = ['G5NR_template_full', 'G5NR_template_simple_cloudsir']
+bundleOutTags = ['full', 'simple']
 
 
 # ## Now, pick a Tag for this session's *Case Notebooks*.

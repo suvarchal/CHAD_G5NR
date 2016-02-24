@@ -356,8 +356,8 @@ class ClickHistDo:
         tempISL = './Output/Scripts/idvImZIDVOutput_'+commonFilename+'.isl'
 
         # Process a few replacements via sed
-        call('sed \'s/BUNDLENAME/'+commonFilename+'/\' '+basisISL+' > ' +
-             tempISL, shell=True)
+        call('sed \'s/BUNDLENAME/'+commonFilename+'_'+self.bundleOutTags[0] +
+             '/\' '+basisISL+' > '+tempISL, shell=True)
         call('sed '+backupTag+' \'s/MOVIENAME/'+commonFilename+'/\' ' +
              tempISL, shell=True)
         call('sed '+backupTag+' \'s/IMAGENAME/'+commonFilename+'/\' ' +
