@@ -20,8 +20,9 @@ from subprocess import call
 import sys
 
 __author__ = 'niznik'
-__clickHistName__ = 'CHAD G5NR'
-__version__ = '1.0.1'
+__clickHistImpName__ = 'CHAD G5NR'
+__version__ = '1.1.1'
+__chversion__ = '1.0.0'
 
 
 class ClickHist:
@@ -43,7 +44,7 @@ class ClickHist:
 
         # Make sure the tmp directory exists for mostRecentCH.png
         if not os.path.exists('./Output/'):
-            call('mkdir ./Output/Tmp/', shell=True)
+            call('mkdir ./Output/', shell=True)
 
         if not os.path.exists('./Output/Tmp/'):
             call('mkdir ./Output/Tmp/', shell=True)
@@ -501,11 +502,23 @@ class ClickHist:
         # There is currently no implemented method to change all of the
         # fractional paramters if the window is resized, so clicking would
         # break
-        plt.get_current_fig_manager().window.resizable(False,False)
+        print('(Using '+plt.get_backend()+')')
+        if plt.get_backend() == 'Qt4Agg':
+            plt.get_current_fig_manager().window.setFixedSize(self.figXPixelsReq,
+                                                              self.figYPixelsReq)
+            plt.get_current_fig_manager().window.statusBar().hide()
+        elif plt.get_backend() == 'TkAgg':
+            plt.get_current_fig_manager().window.resizable(False, False)
+        else:
+            print('Warning - undetected figure manager. Resizing window ' +
+                  'will result in unexpected behavior')
 
         # Display text with the current version and any other messages
-        self.figure.text(0.01,0.010,
-                         __clickHistName__+' Version '+__version__,
+        self.figure.text(0.01, 0.0225,
+                         __clickHistImpName__+' Version '+__version__,
+                         fontsize=4)
+        self.figure.text(0.01, 0.01,
+                         'Built on ClickHist Version '+__chversion__,
                          fontsize=4)
 
         plt.show()

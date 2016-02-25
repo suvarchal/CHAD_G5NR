@@ -1,3 +1,46 @@
+version 1.1.1: 2/24/2016
+- Fixed the .isl script functionality (was broken due to changes in bundle naming conventions)
+- Slight tweak to user information in the loading notebook
+
+version 1.1.0: 2/22/2016
+- Allow for multiple bundle templates to be processed
+- Bundle output now has a tag so that the basis bundle can be recognized
+- A new Case Notebook is now generated for each case instead of appending to one notebook
+- Case notebook is of type JyIDV
+- All image types specified in the loading notebook are now saved in the Case Notebook
+- Switched default graphics to Qt4Agg, though tk is still useable (though errors may crop up in newer matplotlib)
+- Other minor output and logistical tweaks
+
+version 1.0.11: 2/19/2016
+- Added a success message to indicate the templatizer succeeded
+
+version 1.0.10: 2/19/2016
+- Added a notebook that pre-processes IDV bundle files for use as template (still can be run on command line as well)
+- Added lxml requirement to environments
+- Moved 'Templates' folder to the main directory instead of in 'Output' (which was misleading)
+
+version 1.0.9: 2/19/2016
+- Updated valid names for variables and G5NR image archive types
+
+version 1.0.8: 2/18/2016
+- Fixed a bug due to NASA images starting at 17.5 W instead of 0 E so images are now properly centered
+
+version 1.0.7: 2/17/2016
+- Added error handling for if the G5NR image cannot load
+- Added a few notes to the load notebook
+
+version 1.0.6: 2/16/2016
+- Implemented image wraparound and added a red box to indicate where the event occurred for the G5NR imagery in the Case Notebooks
+
+version 1.0.5: 2/15/2016
+- Added the ability for multiple links to be printed (only one subset image saves in the Case Notebook though)
+
+version 1.0.4: 2/15/2016
+- Deleted old loading notebooks
+
+version 1.0.3: 2/15/2016
+- Added a new, clearer load notebook (_Clarity)
+
 version 1.0.2: 2/10/2016
 - updating ClickHist_G5NR for compatability with ClickHist V1.0.0
 
