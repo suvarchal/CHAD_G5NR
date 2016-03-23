@@ -31,7 +31,7 @@ bundleOutTags = ['full', 'simple']
 
 # In[ ]:
 
-caseNotebookFilename = 'Feb22'
+caseNotebookFilename = 'Mar23'
 
 
 # ## (2) Set the variables, data sources, and other necessary information.
@@ -106,6 +106,14 @@ imageVar = ['cloudsir']
 lonOffset = 1.0
 latOffset = 1.0
 dtFromCenter = 3*3600
+
+
+# ### Would you like specific quantiles indicated in X and Y?
+# **If so, specify them here.**
+
+# In[ ]:
+
+quantiles = [0.01,0.1,1,5,95,99,99.9,99.99]
 
 
 # ### Import the necessary modules needed for CHAD to work
@@ -255,6 +263,7 @@ ClickHist1 = ClickHist.ClickHist(var1Edges,var2Edges,
                                  xFmtStr=var1FmtStr,
                                  yFmtStr=var2FmtStr,
                                  maxPlottedInBin=loadmod_G5NR.maxPlottedInBin_UD,
+                                 quantiles=quantiles,
                                  metadata=metadata_UD)
 ClickHist1.setDo(ClickHistDo1)
 ClickHist1.showPlot()
