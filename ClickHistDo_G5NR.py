@@ -248,11 +248,11 @@ class ClickHistDo:
                           str("%03i"%inputLon)+'_'+str("%02i"%inputLat)+'_' +
                           timeTag)
 
-        # The flag for dealing with backup in OS X and Linux is different
+        # The flag for dealing with backup in OS X and Linux is different but -i.bckp works for both
         # Set it here based on the OS that was determined upon initialization
-        backupTag = ''
+        backupTag = '-i.bckp'
         if self.os.startswith('darwin'):
-            backupTag = '-i \'.bckp\''
+            backupTag = '-i.bckp'
         elif self.os.startswith('linux'):
             backupTag = '-i.bckp'
         else:
@@ -292,18 +292,6 @@ class ClickHistDo:
                                 commonFilename+'_' +
                                 self.bundleOutTags[ii]+'.xidv')
 
-            # The flag for dealing with backup in OS X and Linux is different
-            # Set it here based on the OS that was determined upon
-            # initialization
-            backupTag = ''
-            if self.os.startswith('darwin'):
-                backupTag = '-i \'.bckp\''
-            elif self.os.startswith('linux'):
-                backupTag = '-i.bckp'
-            else:
-                print('Unsupported OS detected')
-                print('Functionality might not work as intended...')
-
             # Each call to sed here replaces one of the dummy lon/lat/time
             # values with the values appropriate to the passed data point
             call('sed \'s/'+minLonFiller+'/'+westLon+'/\' ' +
@@ -341,7 +329,7 @@ class ClickHistDo:
                  '/\' ' + tempBundleFiles[ii], shell=True)
             call('sed '+backupTag+' \'s/'+metadataFiller+'/'+self.metadata +
                  '/\' ' + tempBundleFiles[ii], shell=True)
-
+                            
             # Save the bundle with a recognizable filename
             call('mv '+tempBundleFiles[ii]+' '+finalBundleFile, shell=True)
             call('rm '+tempBundleFiles[ii]+'.bckp', shell=True)
@@ -356,6 +344,7 @@ class ClickHistDo:
         tempISL = './Output/Scripts/idvImZIDVOutput_'+commonFilename+'.isl'
 
         # Process a few replacements via sed
+
         call('sed \'s/BUNDLENAME/'+commonFilename+'_'+self.bundleOutTags[0] +
              '/\' '+basisISL+' > '+tempISL, shell=True)
         call('sed '+backupTag+' \'s/MOVIENAME/'+commonFilename+'/\' ' +
@@ -391,6 +380,7 @@ class ClickHistDo:
 
         date = str(datetime.datetime.now().replace(second=0,
                                                    microsecond=0))
+        
         call('sed '+backupTag+' \'s/INSERT_DATE/'+date+'/\' ' +
              pathToCaseNB, shell=True)
         call('rm '+pathToCaseNB+'.bckp', shell=True)
@@ -448,7 +438,9 @@ class ClickHistDo:
             linesToAdd.append('    \"![](../Images/' + commonFilename +
                               '_CH.png)\"\n')
             self.appendCellEnd(linesToAdd, False)
-
+            
+            
+            print 'Adding images to the notebook'
             for ii in range(0, len(self.imageVar)):
 
                 imageLoaded = 1
