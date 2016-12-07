@@ -20,11 +20,11 @@ maxPlottedInBin_UD = 1000
 # (https://mkaz.github.io/2012/10/10/python-string-format/)
 # These are OPTIONAL inputs to ClickHist: xFmtStr=?,yFmtStr=?)
 fmtStrOptions = {'Precip': "{:3.0f}", 'W500': "{:0.3f}", 'wPuP': "{:0.2f}",
-                 'TEEF': "{:3.0f}", 'HMV': "{:2.0f}", 'ZSKEDot': "{:0.3f}"}
+                 'TEEF': "{:3.0f}", 'HMV': "{:2.0f}", 'SKEDot': "{:0.3f}"}
 
 # These are the variable names in the loaded data files
 valueNameOptions = {'Precip': 'PREC', 'W500': 'W', 'wPuP': 'WPUP',
-                    'TEEF': 'TEEF', 'HMV': 'HMV', 'ZSKEDot': 'ZSKEDOT'}
+                    'TEEF': 'TEEF', 'HMV': 'HMV', 'SKEDot': 'SKEDOT'}
 
 binOptions = {'Precip': np.array([0., 1., 11., 21., 31., 41., 51.,
                                   61., 71., 81., 91., 101., 250.]),
@@ -37,18 +37,18 @@ binOptions = {'Precip': np.array([0., 1., 11., 21., 31., 41., 51.,
                                  260., 300., 340., 380., 420., 1000.]),
               'HMV': np.array([0., 4., 8., 12., 16., 20., 24.,
                                28., 32., 36., 40., 44., 100.]),
-              'ZSKEDot': np.array([-5., -1.10, -0.90, -0.70, -0.50,
+              'SKEDot': np.array([-5., -1.10, -0.90, -0.70, -0.50,
                                    -0.30, -0.10, 0.10, 0.30, 0.50,
                                    0.70, 0.90, 5.])*1.5}
 
 varUnitOptions = {'Precip': 'mm day-1', 'W500': 'm s-1', 'wPuP': 'm2 s-2',
                   'TEEF': 'J m kg-1 s-1', 'HMV': 'm2 s-2',
-                  'ZSKEDot': 'm2 s-3 (x 10^-3)'}
+                  'SKEDot': 'W m-2'}
 
 # If you are converting to units different from those in the input files,
 # you can set a conversion factor here
 varMultOptions = {'Precip': 86400., 'W500': 1., 'wPuP': 1.,
-                  'TEEF': 1., 'HMV': 1., 'ZSKEDot': 1000.}
+                  'TEEF': 1., 'HMV': 1., 'SKEDot': 1.}
 
 # These values are tied to the current data files in the loaders. If you change
 # the data files, you will likely have to change many of these values
