@@ -460,17 +460,20 @@ class ClickHistDo:
                     print('(Not saving image file)')
                     imageLoaded = 0
 
+                imgInWidth = imgIn.size[0]
+                imgInHeight = imgIn.size[1]
+
                 if imageLoaded == 1:
-                    outImageWidthHalf = int(imgIn.width*(30./360.))
-                    outImageHeightHalf = int(imgIn.height*(15./180.))
+                    outImageWidthHalf = int(imgInWidth*(30./360.))
+                    outImageHeightHalf = int(imgInHeight*(15./180.))
 
                     # NASA images start at 17.5 W, not 0 E so we need to account
                     # for that. Pulled out the numerator to make things clearer.
                     lonOffset = 17.5
                     numForCentX = (inputLon+lonOffset) % 360
 
-                    cropCentX = int((numForCentX/360.)*imgIn.width)
-                    cropCentY = int((-1.*(inputLat-90.)/180.)*imgIn.height)
+                    cropCentX = int((numForCentX/360.)*imgInWidth)
+                    cropCentY = int((-1.*(inputLat-90.)/180.)*imgInHeight)
                     centToEdgeX = outImageWidthHalf
                     centToEdgeY = outImageHeightHalf
 
@@ -484,9 +487,9 @@ class ClickHistDo:
 
                     boxHeightOffset = 0
 
-                    if lowerEdge >= imgIn.height:
-                        boxHeightOffset = lowerEdge - imgIn.height
-                        lowerEdge = imgIn.height-1
+                    if lowerEdge >= imgInHeight:
+                        boxHeightOffset = lowerEdge - imgInHeight
+                        lowerEdge = imgInHeight-1
                         upperEdge = lowerEdge-centToEdgeY*2
                     elif upperEdge < 0:
                         boxHeightOffset = upperEdge
@@ -496,22 +499,22 @@ class ClickHistDo:
                     imgCrop1, imgCrop2 = None, None
 
                     if leftEdge < 0:
-                        imgCrop1 = imgIn.crop((leftEdge+imgIn.width,
+                        imgCrop1 = imgIn.crop((leftEdge+imgInWidth,
                                                upperEdge,
-                                               imgIn.width-1,
+                                               imgInWidth-1,
                                                lowerEdge))
                         imgCrop2 = imgIn.crop((0,
                                                upperEdge,
                                                rightEdge,
                                                lowerEdge))
-                    elif rightEdge >= imgIn.width:
+                    elif rightEdge >= imgInWidth:
                         imgCrop1 = imgIn.crop((leftEdge,
                                                upperEdge,
-                                               imgIn.width-1,
+                                               imgInWidth-1,
                                                lowerEdge))
                         imgCrop2 = imgIn.crop((0,
                                                upperEdge,
-                                               rightEdge-imgIn.width,
+                                               rightEdge-imgInWidth,
                                                lowerEdge))
                     else:
                         imgCrop1 = imgIn.crop((leftEdge,
@@ -521,12 +524,12 @@ class ClickHistDo:
 
                     imgToSave.paste(imgCrop1, (0, 0))
                     if imgCrop2 is not None:
-                        imgToSave.paste(imgCrop2, (imgCrop1.width, 0))
+                        imgToSave.paste(imgCrop2, (imgCrop1.size[0], 0))
 
                     pix = imgToSave.load()
 
-                    saveCenterW = imgToSave.width/2
-                    saveCenterH = imgToSave.height/2
+                    saveCenterW = imgToSave.size[0]/2
+                    saveCenterH = imgToSave.size[1]/2
                     sqRad = 5
 
                     for x in range(saveCenterW-sqRad, saveCenterW+sqRad+1, 1):
