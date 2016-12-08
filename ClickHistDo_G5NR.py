@@ -456,9 +456,9 @@ class ClickHistDo:
                     imgIn = Image.open(imgFile)
                 except IOError:
                     print('Couldn\'t open the G5NR image...is the server down?')
-                    imgIn = Image.open('BrokenLinkImage.jpeg')
+                    imgIn = Image.open('BrokenLinkImage.png')
                     print('(Using Broken Link Image)')
-                    imageLoaded = 0
+                    imageLoaded = 1 # not 0, use dummy image instead of no image
 
                 imgInWidth = imgIn.size[0]
                 imgInHeight = imgIn.size[1]
