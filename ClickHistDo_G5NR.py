@@ -175,6 +175,13 @@ class ClickHistDo:
             self.find3DIndices(flatIndex)
         inputLon = self.lons[inputLonIndex]
         inputLat = self.lats[inputLatIndex]
+        
+# debug a time error (it was in the dataset, not the code)
+#        print 'self.startDatetime', self.startDatetime 
+#        print 'self.times[inputTimeIndex]', self.times[inputTimeIndex]
+#        print 'datetime.timedelta(0, (self.times[inputTimeIndex]))', \
+#        datetime.timedelta(0, (self.times[inputTimeIndex]))
+
         inputDatetime = (self.startDatetime +
                          datetime.timedelta(0, (self.times[inputTimeIndex])))
         inputTime = int(calendar.timegm(inputDatetime.timetuple()))
@@ -449,7 +456,8 @@ class ClickHistDo:
                     imgIn = Image.open(imgFile)
                 except IOError:
                     print('Couldn\'t open the G5NR image...is the server down?')
-                    print('(Not saving image file)')
+                    imgIn = Image.open('BrokenLinkImage.jpeg')
+                    print('(Using Broken Link Image)')
                     imageLoaded = 0
 
                 imgInWidth = imgIn.size[0]
