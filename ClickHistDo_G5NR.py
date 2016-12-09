@@ -241,8 +241,8 @@ class ClickHistDo:
 
         # Next, the start and end time for the time looping
         adjTime = int(inputTime)*1000
-        startTime = str(adjTime-self.dtFromCenter)
-        endTime = str(adjTime+self.dtFromCenter)
+        startTime = str(long(adjTime-self.dtFromCenter))
+        endTime = str(long(adjTime+self.dtFromCenter))
         # IDV wants these in minutes (hence dividing by 60*1000 to convert
         # out of milliseconds)
         startOffset = str(0)
