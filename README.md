@@ -4,7 +4,7 @@ CHAD (= ClickHist + Atmospheric Data)
 
 An implementation for exploring data in NASA's GEOS-5 7 km Nature Run (G5NR)
 
-Latest version: Brian Mapes, December 2016
+Latest version: Brian Mapes (mapes at miami dot edu), December 2016
 
 Author: Matthew Niznik (matthewniznik on Github)
 
