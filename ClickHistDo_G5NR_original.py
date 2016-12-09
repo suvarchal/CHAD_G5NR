@@ -12,10 +12,9 @@ import webbrowser
 __author__ = 'niznik'
 
 # ClickHistDo is very much specific to the implementation of ClickHist
-
-# In this implementation, input data and relevant axis data are used
-# to create multiple .xidv files usable with IDV 
-# based on a clicked scatterplot point from a ClickHist
+# In this IDV implementation, input data and relevant axis data are used
+# to create multiple files usable with IDV to explore the environments that
+# generated a scatter point from a ClickHist
 
 
 class ClickHistDo:
@@ -105,7 +104,6 @@ class ClickHistDo:
         if not isinstance(self.imageVar, list):
             raise TypeError('imageVar should be a list')
 
-#This is a CLASS called a "do"
     def do(self, flatIndex, **kwargs):
 
         """
@@ -248,24 +246,14 @@ class ClickHistDo:
         startOffset = str(0)
         endOffset = str((self.dtFromCenter*2)/(60*1000))
 
-        # Determine the filename based on the quantiles of the scatterplot parameters 
+        # Determine the filename based on various parameters and set the name
+        # for the final .xidv file that is written
         timeTag = self.convertToYMDT(inputTime)
-        
-# Old and hard to read: 
-# example    Precip_SKEDot_96667_01111_208_-20_20070605_0630
-#        commonFilename = (self.xVarName+'_'+self.yVarName+'_' +
-#                          "{:005.0f}".format(min(1000*self.xPer, 99999))+'_' +
-#                          "{:005.0f}".format(min(1000*self.yPer, 99999))+'_' +
-#                          str("%03i"%inputLon)+'_'+str("%02i"%inputLat)+'_' +
-#                          timeTag)
-#Newer, BEM likes better. Hope sign is allowed for Lat and Lon
-        commonFilename = (self.xVarName+'_quantile_'+
-                          "{:005.3f}".format(min(self.xPer, 99.999))+'_' +
-                          self.yVarName+'_quantile_'+
-                          "{:005.3f}".format(min(self.yPer, 99.999))+'_' +
-                          'lat_'+str("%02i"%inputLat)+'_' +
-                          'lon_'+str("%03i"%inputLon)+'_' +
-                          'time_'+timeTag)
+        commonFilename = (self.xVarName+'_'+self.yVarName+'_' +
+                          "{:005.0f}".format(min(1000*self.xPer, 99999))+'_' +
+                          "{:005.0f}".format(min(1000*self.yPer, 99999))+'_' +
+                          str("%03i"%inputLon)+'_'+str("%02i"%inputLat)+'_' +
+                          timeTag)
 
         # The flag for dealing with backup in OS X and Linux is different but -i.bckp works for both
         # Set it here based on the OS that was determined upon initialization
@@ -300,7 +288,6 @@ class ClickHistDo:
         endOffsetFiller = '361.23456789'
         metadataFiller = 'replaceme_METADATASTRING_replaceme'
 
-# Section for modifying .xidv template bundles:         
         # change finalBundleFile to a list of filenames and loop over them
         finalBundles = []
         for ii in range(0, len(basisBundleFiles)):
@@ -358,8 +345,6 @@ class ClickHistDo:
             print('Bundle \''+self.bundleOutTags[ii]+'\' Saved!')
 
         print('')
-        
-# End section for modifying .xidv bundles, now modify .isl template
 
         # Now create the ISL file - a bit less involved
         basisISL = './Templates/idvMovieOutput_fillIn.isl'
@@ -379,16 +364,13 @@ class ClickHistDo:
         # Clean up backup files
         call('rm '+tempISL+'.bckp', shell=True)
 
-# End section for modifying .isl scripts
-
-
-#The section to actually write the JSON of the .ipynb notebook
         # Create a Case Notebook!
         caseNotebookFilename = (self.caseNotebookFilenameTag + '_' +
                                 commonFilename+'.ipynb')
+
         print('Creating Case Notebook ('+caseNotebookFilename +
               ')')
- 
+
         if not os.path.exists('./Output/CaseNotebooks/'):
             call('mkdir ./Output/CaseNotebooks', shell=True)
 
@@ -396,31 +378,26 @@ class ClickHistDo:
                           caseNotebookFilename) == True):
             print('Notebook previously created - returning...')
             return
-        
-        #Copy the template (it must exist already)
-        print('Copy the template')
 
         call('cp ./Templates/caseNotebookTemplate.ipynb ' +
              './Output/CaseNotebooks/'+caseNotebookFilename, shell=True)
 
-    # Now insert case specific information into the template 
+        # sed-ing
         pathToCaseNB = './Output/CaseNotebooks/'+caseNotebookFilename
 
         date = str(datetime.datetime.now().replace(second=0,
                                                    microsecond=0))
-        # Creation date
+        
         call('sed '+backupTag+' \'s/INSERT_DATE/'+date+'/\' ' +
              pathToCaseNB, shell=True)
         call('rm '+pathToCaseNB+'.bckp', shell=True)
 
-    # Grab a copy of the .ipynb as a string list called lines. 
-    # Code will change that, then write it out. 
         inFile = open('./Output/CaseNotebooks/' +
                       caseNotebookFilename, 'r')
         lines = inFile.readlines()
         inFile.close()
 
-        # Add case metadata under the line containing the string called Quick Stats
+        # Add case metadata
         insertIndexMeta = -1
         for ll in range(0, len(lines)-1):
             if 'Quick Stats' in lines[ll]:
@@ -431,38 +408,48 @@ class ClickHistDo:
         lines.insert(insertIndexMeta+2, '    \"'+locationString+'<br>\",\n')
         lines.insert(insertIndexMeta+3, '    \"'+xyValString+'<br>\",\n')
         lines.insert(insertIndexMeta+4, '    \"'+perString+'<br>\"\n')
-       
-        #define where to add new image cells 
-        insertImageCells = insertIndexMeta+7 # After the close of metadata cell above
-        
-        
-        # The next thing I want at the top is the quicklook imagery. This involves adding new cells.
-        if True:   # BEM is too lazy to reindent this block so make it a if True:
-            linesToAdd = []
 
-            
-            # First image is the scatterplot with highlighted point that defines the case
-            # Copy it into the Images folder so it is not lost after it is overwritten
+        # Add the load calls for all generated bundles
+        insertIndexLoad = -1
+        for ll in range(0, len(lines)-1):
+            if 'loadBundle()' in lines[ll]:
+                insertIndexLoad = ll
+
+        lines[insertIndexLoad] = ('    \"#loadBundle(\''+finalBundles[0] +
+                                  '\')\\n\",\n')
+        for bb in range(1, len(finalBundles)):
+            lines.insert(insertIndexLoad+bb, '    \"#loadBundle(\'' +
+                         finalBundles[bb]+'\')\\n\"')
+            if bb != len(finalBundles)-1:
+                lines[insertIndexLoad+bb] += ','
+            lines[insertIndexLoad+bb] += '\n'
+
+        # Add images at the very end of the Case Notebook
+        insertIndexEnd = -1
+        for ll in range(0, len(lines)-1):
+            if lines[ll] == ' ],\n' and lines[ll+1] == ' \"metadata\": {\n':
+                insertIndexEnd = ll
+
+        if insertIndexEnd == -1:
+            print('ClickHistDo could not read the Case Notebook properly. ' +
+                  'Not recording...')
+        else:
+
             call('cp ./Output/Tmp/mostRecentCH.png ./Output/Images/' +
                  commonFilename+'_CH.png', shell=True)
 
-            # Open a new notebook cell of type Markdown and put the name there
+            linesToAdd = []
             self.appendCellStart(linesToAdd, 'markdown')
             linesToAdd.append('    \"**Common Filename:** `' +
                               commonFilename+'`\",\n')
-            # Appending the actual image, instead of a command to fetch it, involves ![]
             linesToAdd.append('    \"![](../Images/' + commonFilename +
                               '_CH.png)\"\n')
             self.appendCellEnd(linesToAdd, False)
             
             
-            # Open new notebook cells with the RESULTS of Image() calls in them
-            print 'Adding quicklook images to the notebook'        
-            print 'Now looping over ', self.imageVar, '...'
-            
+            print 'Adding images to the notebook'
             for ii in range(0, len(self.imageVar)):
-                print ' trying ', self.imageVar[ii], '...'
-                # Load an image, or use a broken link image of the same size
+
                 imageLoaded = 1
                 try:
                     imgFile = StringIO.StringIO(urllib.urlopen(urlSave[ii]).read())
@@ -471,12 +458,11 @@ class ClickHistDo:
                     print('Couldn\'t open the G5NR image...is the server down?')
                     imgIn = Image.open('BrokenLinkImage.png')
                     print('(Using Broken Link Image)')
-                    # imageLoaded = 0, I changed this to use a dummy image instead of no image
+                    imageLoaded = 1 # not 0, use dummy image instead of no image
 
                 imgInWidth = imgIn.size[0]
                 imgInHeight = imgIn.size[1]
 
-                #Crop the image, very specific to G5NR images on the web site
                 if imageLoaded == 1:
                     outImageWidthHalf = int(imgInWidth*(30./360.))
                     outImageHeightHalf = int(imgInHeight*(15./180.))
@@ -551,62 +537,26 @@ class ClickHistDo:
                                        saveCenterH+boxHeightOffset+sqRad+1, 1):
                             pix[x, y] = (255, 0, 0)
 
-                    # output cropped image
                     saveFilename = (commonFilename + '_' + self.imageVar[ii] +
                                     '.png')
+
                     imgToSave.save('./Output/Images/' + saveFilename)
 
-                    
-                    # Now put the cropped image in a markdown cell. If it's not the last, need a comma
-                    if ii < len(self.imageVar)-1:
-                        print 'appending '+str(ii)
-                        self.appendCellStart(linesToAdd, 'markdown')
-                        linesToAdd.append('    \"![](../Images/' +
-                                      saveFilename+')\",\n')
-                    
-                    #If this was the last image to add, no comma and close (False <- not final cell)
-                    else: 
-                        print 'appending '+str(ii)+' and adding URL'
-                        linesToAdd.append('    \"![](../Images/' +
+                    self.appendCellStart(linesToAdd, 'markdown')
+                    linesToAdd.append('    \"![](../Images/' +
                                       saveFilename+')\"\n')
+                    if ii == len(self.imageVar)-1:
+                        self.appendCellEnd(linesToAdd, True)
+                    else:
                         self.appendCellEnd(linesToAdd, False)
 
-                #endif ImageLoaded
-            #endfor loop over all images wanted
-#        except: 
-#            print 'Problem with the quicklook images!'
-
-            # Now insert this block of linesToAdd[] containing the image cells into lines[]
+            # Need to manually edit the last line of the last cell to tell it
+            # there's more coming...
+            lines[insertIndexEnd-1] = lines[insertIndexEnd-1][0:3]+',' +\
+                                   lines[insertIndexEnd-1][3:]
             for ll in range(0, len(linesToAdd)):
-                lines.insert(insertImageCells+ll, linesToAdd[ll])
+                lines.insert(insertIndexEnd+ll, linesToAdd[ll])
 
-            
-    # Next part of the notebook is the IDV commands with the filename prepopulated
-            
-        # Add the load calls for all generated bundles, find the right cell 
-        insertIndexLoad = -1
-        for ll in range(0, len(lines)-1):
-            if 'loadBundle()' in lines[ll]:
-                insertIndexLoad = ll
-
-        lines[insertIndexLoad] = ('    \"#loadBundle(\''+finalBundles[0] +
-                                  '\')\\n\",\n')
-        for bb in range(1, len(finalBundles)):
-            lines.insert(insertIndexLoad+bb, '    \"#loadBundle(\'' +
-                         finalBundles[bb]+'\')\\n\"')
-            if bb != len(finalBundles)-1:
-                lines[insertIndexLoad+bb] += ','
-            lines[insertIndexLoad+bb] += '\n'
-
-        # Stub to add something at the very end of the Case Notebook if desired
-        #insertIndexEnd = -1
-        #for ll in range(0, len(lines)-1):
-        #    if lines[ll] == ' ],\n' and lines[ll+1] == ' \"metadata\": {\n':
-        #        insertIndexEnd = ll
-
-
-
-    # WRITE THE NOTEBOOK
             outFile = open('./Output/Tmp/'+caseNotebookFilename, 'w')
             outFile.writelines(lines)
             outFile.close()
@@ -617,7 +567,6 @@ class ClickHistDo:
 
         return
 
-    
     def convertToYMDT(self, unixTime):
         """
         Converts a Unix/Epoch time given in seconds to a YMDT string for
