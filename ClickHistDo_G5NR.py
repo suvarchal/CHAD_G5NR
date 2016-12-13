@@ -37,7 +37,7 @@ class ClickHistDo:
         as some interval (seconds, minutes, hours, days) after a reference
         time. In the case of ClickHist, the user is expected to convert
         the times array to seconds for input.
-        :param bundle: The name of the template bundle to be altered
+        :param bundles: The name(s) of the template bundle(s) to be altered
         :param caseNotebookFilename: The name of the file (without .ipynb
         extension) that the user's progress will be saved to
         :param kwargs: many options - see wiki for now
@@ -78,7 +78,7 @@ class ClickHistDo:
         self.bundleOutTags = bundleTags
 
         # Set name of the case notebook file
-        self.caseNotebookFilenameTag = caseNotebookFilenameTag
+        self.sessionName = caseNotebookFilenameTag
 
         self.openTab = False
         if 'openTab' in kwargs:
@@ -145,16 +145,23 @@ class ClickHistDo:
         # Note that GeneratedBundlesZ and Images are not necessary at runtime
         # here, but they will be needed as soon as the user runs the .isl
         # script so it's best to make them ahead of time to avoid errors
-        if not os.path.exists('./Output/Tmp/'):
-            call('mkdir ./Output/Tmp/', shell=True)
-        if not os.path.exists('./Output/GeneratedBundles/'):
-            call('mkdir ./Output/GeneratedBundles/', shell=True)
-        if not os.path.exists('./Output/GeneratedBundlesZ/'):
-            call('mkdir ./Output/GeneratedBundlesZ/', shell=True)
-        if not os.path.exists('./Output/Scripts/'):
-            call('mkdir ./Output/Scripts/', shell=True)
-        if not os.path.exists('./Output/Images/'):
-            call('mkdir ./Output/Images/', shell=True)
+
+        if not os.path.exists('./Tmp/'):
+            call('mkdir ./Tmp/', shell=True)
+
+        if not os.path.exists('./'+self.sessionName):
+            call('mkdir '+self.sessionName, shell=True)
+        if not os.path.exists('./'+self.sessionName+'/Output'):
+            call('mkdir '+self.sessionName+'/Output', shell=True)
+
+        if not os.path.exists('./'+self.sessionName+'/Output/GeneratedBundles/'):
+            call('mkdir '+self.sessionName+'/Output/GeneratedBundles/', shell=True)
+        if not os.path.exists('./'+self.sessionName+'/Output/GeneratedBundlesZ/'):
+            call('mkdir '+self.sessionName+'/Output/GeneratedBundlesZ/', shell=True)
+        if not os.path.exists('./'+self.sessionName+'/Output/Scripts/'):
+            call('mkdir '+self.sessionName+'/Output/Scripts/', shell=True)
+        if not os.path.exists('./'+self.sessionName+'/Output/Images/'):
+            call('mkdir '+self.sessionName+'/Output/Images/', shell=True)
 
         # Notify the user that the processing has begun
         print('Saving IDV bundle(s)...')
@@ -168,7 +175,7 @@ class ClickHistDo:
         for ii in range(0, len(self.bundleInFilenames)):
             basisBundleFiles.append('./Templates/' +
                                     self.bundleInFilenames[ii] + '.xidv')
-            tempBundleFiles.append('./Output/Tmp/tempBundle_' +
+            tempBundleFiles.append('./Tmp/tempBundle_' +
                                    currentUnixTime+str(ii)+'.xidv')
 
         # Determine the longitude, latitude, and time of the point passed
@@ -305,12 +312,12 @@ class ClickHistDo:
         finalBundles = []
         for ii in range(0, len(basisBundleFiles)):
 
-            finalBundleFile = ('./Output/GeneratedBundles/' +
+            finalBundleFile = ('./'+self.sessionName+'/Output/GeneratedBundles/' +
                                commonFilename+'_' +
                                self.bundleOutTags[ii]+'.xidv')
             finalBundles.append('../GeneratedBundles/' +
                                 commonFilename+'_' +
-                                self.bundleOutTags[ii]+'.xidv')
+                               self.bundleOutTags[ii]+'.xidv')
 
             # Each call to sed here replaces one of the dummy lon/lat/time
             # values with the values appropriate to the passed data point
@@ -363,7 +370,7 @@ class ClickHistDo:
 
         # Now create the ISL file - a bit less involved
         basisISL = './Templates/idvMovieOutput_fillIn.isl'
-        tempISL = './Output/Scripts/idvImZIDVOutput_'+commonFilename+'.isl'
+        tempISL = './'+self.sessionName+'/Output/Scripts/zidv_Maker_'+commonFilename+'.isl'
 
         # Process a few replacements via sed
 
@@ -384,15 +391,14 @@ class ClickHistDo:
 
 #The section to actually write the JSON of the .ipynb notebook
         # Create a Case Notebook!
-        caseNotebookFilename = (self.caseNotebookFilenameTag + '_' +
-                                commonFilename+'.ipynb')
+        caseNotebookFilename = (commonFilename+'.ipynb')
         print('Creating Case Notebook ('+caseNotebookFilename +
               ')')
  
-        if not os.path.exists('./Output/CaseNotebooks/'):
-            call('mkdir ./Output/CaseNotebooks', shell=True)
+        if not os.path.exists('./'+self.sessionName+'/Output/CaseNotebooks/'):
+            call('mkdir '+self.sessionName+'/Output/CaseNotebooks', shell=True)
 
-        if(os.path.isfile('./Output/CaseNotebooks/' +
+        if(os.path.isfile('./'+self.sessionName+'/Output/CaseNotebooks/' +
                           caseNotebookFilename) == True):
             print('Notebook previously created - returning...')
             return
@@ -401,10 +407,11 @@ class ClickHistDo:
         print('Copy the template')
 
         call('cp ./Templates/caseNotebookTemplate.ipynb ' +
-             './Output/CaseNotebooks/'+caseNotebookFilename, shell=True)
+             './'+self.sessionName+'/Output/CaseNotebooks/'+caseNotebookFilename, shell=True)
 
-    # Now insert case specific information into the template 
-        pathToCaseNB = './Output/CaseNotebooks/'+caseNotebookFilename
+    # Now insert case specific information into the template
+
+        pathToCaseNB = './'+self.sessionName+'/Output/CaseNotebooks/'+caseNotebookFilename
 
         date = str(datetime.datetime.now().replace(second=0,
                                                    microsecond=0))
@@ -415,7 +422,7 @@ class ClickHistDo:
 
     # Grab a copy of the .ipynb as a string list called lines. 
     # Code will change that, then write it out. 
-        inFile = open('./Output/CaseNotebooks/' +
+        inFile = open('./'+self.sessionName+'/Output/CaseNotebooks/' +
                       caseNotebookFilename, 'r')
         lines = inFile.readlines()
         inFile.close()
@@ -443,7 +450,7 @@ class ClickHistDo:
             
             # First image is the scatterplot with highlighted point that defines the case
             # Copy it into the Images folder so it is not lost after it is overwritten
-            call('cp ./Output/Tmp/mostRecentCH.png ./Output/Images/' +
+            call('cp ./Tmp/mostRecentCH.png ./'+self.sessionName+'/Output/Images/' +
                  commonFilename+'_CH.png', shell=True)
 
             # Open a new notebook cell of type Markdown and put the name there
@@ -554,22 +561,14 @@ class ClickHistDo:
                     # output cropped image
                     saveFilename = (commonFilename + '_' + self.imageVar[ii] +
                                     '.png')
-                    imgToSave.save('./Output/Images/' + saveFilename)
+                    imgToSave.save('./'+self.sessionName+'/Output/Images/' + saveFilename)
 
-                    
-                    # Now put the cropped image in a markdown cell. If it's not the last, need a comma
-                    if ii < len(self.imageVar)-1:
-                        print 'appending '+str(ii)
-                        self.appendCellStart(linesToAdd, 'markdown')
-                        linesToAdd.append('    \"![](../Images/' +
-                                      saveFilename+')\",\n')
-                    
-                    #If this was the last image to add, no comma and close (False <- not final cell)
-                    else: 
-                        print 'appending '+str(ii)+' and adding URL'
-                        linesToAdd.append('    \"![](../Images/' +
+                    # Now put the cropped image in a markdown cell. 
+                    self.appendCellStart(linesToAdd, 'markdown')
+                    linesToAdd.append('    \"![](../Images/' +
                                       saveFilename+')\"\n')
-                        self.appendCellEnd(linesToAdd, False)
+                    self.appendCellEnd(linesToAdd, False)
+
 
                 #endif ImageLoaded
             #endfor loop over all images wanted
@@ -607,11 +606,11 @@ class ClickHistDo:
 
 
     # WRITE THE NOTEBOOK
-            outFile = open('./Output/Tmp/'+caseNotebookFilename, 'w')
+            outFile = open('./Tmp/'+caseNotebookFilename, 'w')
             outFile.writelines(lines)
             outFile.close()
-            call('mv ./Output/Tmp/'+caseNotebookFilename +
-                 ' ./Output/CaseNotebooks/'+caseNotebookFilename, shell=True)
+            call('mv ./Tmp/'+caseNotebookFilename +
+                 ' ./'+self.sessionName+'/Output/CaseNotebooks/'+caseNotebookFilename, shell=True)
 
         print('Case Notebook created!')
 
